@@ -4,7 +4,7 @@
 #include <iostream>
 
 int main() {
-	#pragma omp parallel num_threads(3)
+	#pragma omp parallel num_threads(8)
     {
         std::cout << "Hello" << std::endl;
     }
