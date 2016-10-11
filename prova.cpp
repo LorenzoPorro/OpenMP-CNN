@@ -6,7 +6,7 @@ using namespace std;
 
 
 /*convolution function: takes in input the input matrix, the kernel matrix and the output*/
-void convolution(int input[224][224], float kernel[11][11], float layer_conv[224][224], int size, int ksize){
+void convolution(int input[224][224], float kernel[11][11], float layer_conv[224][224], int size, int ksize, int bias){
     
     int kcenterx=ksize/2;
     int kcentery=ksize/2;
@@ -26,7 +26,7 @@ void convolution(int input[224][224], float kernel[11][11], float layer_conv[224
                     int jj=j+(l-kcenterx);
 
                     if(ii>=0 && ii<size && jj>=0 && jj<size){
-                        layer_conv[i][j]+=input[ii][jj]*kernel[kk][ll];
+                        layer_conv[i][j]+=input[ii][jj]*kernel[kk][ll]+bias;
                     }
                 }
             }
@@ -72,6 +72,6 @@ int main() {
 
     // convolution between input image layers matrices and kernels
     float layer_conv1[224][224];
-    convolution(input1,kernel1,layer_conv1,224,11);
+    convolution(input1,kernel1,layer_conv1,224,11,bias);
     
 }
