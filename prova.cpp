@@ -1,40 +1,40 @@
-#include <cstdlib>
 #include <omp.h>
 #include <iostream>
+#include <cstdlib>
+#include <cstdio>
+#include <cmath>
 
 using namespace std;
 
 
-/*convolution function: takes in input the input matrix, the kernel matrix and the output*/
+// convolution function: takes in input the input matrix, the kernel matrix and the output
 void convolution(int input[224][224], float kernel[11][11], float layer_conv[224][224], int size, int ksize, int bias){
     
-    int kcenterx=ksize/2;
-    int kcentery=ksize/2;
+    int ki,kj=(size - (int)(size/ksize) * ksize) / 2;
 
     for(int i=0;i<size;i++){
 
         for(int j=0;j<size;j++){
 
-            for(int k=0;k<ksize;k++){
+            layer_conv[i][j]=input[i][j]*kernel[ki][kj]+bias;
 
-                int kk=ksize-1-k;;
-                for(int l=0;l<ksize;l++){
-
-                    int ll=ksize-1-l;
-
-                    int ii=i+(k-kcentery);
-                    int jj=j+(l-kcenterx);
-
-                    if(ii>=0 && ii<size && jj>=0 && jj<size){
-                        layer_conv[i][j]+=input[ii][jj]*kernel[kk][ll]+bias;
-                    }
-                }
-            }
+            kj++;
+            if(kj>=ksize)
+                kj=0;
         }
-    }
 
+        kj=2;
+        ki++;
+        if(ki>=ksize)
+            ki=0;
+    }
 }
 
+
+// overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
+void maxpooling(int conv[224][224], int layer2[48][48], int csize, int size){
+    //filter dimension ???
+}
 
 
 
@@ -45,6 +45,19 @@ int main() {
     int input2[224][224];
     int input3[224][224];
 
+    // 3 kernels which will convolved on the 3 image matrices
+    float kernel1[11][11];
+    float kernel2[11][11];
+    float kernel3[11][11];
+    // bias
+    int bias = 1;
+
+    // output of convolutional operation between input and kernel
+    float conv1[224][224];
+    float conv2[224][224];
+    float conv3[224][224];
+
+
     // random bit values for each image layer
     for(int i=0;i<224;i++){
         for(int j=0;j<224;j++){
@@ -53,13 +66,6 @@ int main() {
             input3[i][j]=rand()%10;
         }
     }
-
-    // 3 kernels which will convolved on the 3 image matrices
-    float kernel1[11][11];
-    float kernel2[11][11];
-    float kernel3[11][11];
-    // bias
-    int bias = 1;
 
     // random values between 0 and 1 for each kernel
     for(int i=0;i<11;i++){
@@ -70,8 +76,11 @@ int main() {
         }
     }
 
+
     // convolution between input image layers matrices and kernels
-    float layer_conv1[224][224];
-    convolution(input1,kernel1,layer_conv1,224,11,bias);
-    
+    convolution(input1,kernel1,conv1,224,11,bias);
+    convolution(input2,kernel2,conv2,224,11,bias);
+    convolution(input3,kernel3,conv3,224,11,bias);
+
+
 }
