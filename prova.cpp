@@ -81,7 +81,7 @@ void maxpooling(int** input, int** output, int isize, int osize, int p, int stri
 
 int main() {
 
-
+    // to pass matrices of different dimensions to a function we use a pointer of pointers
     // input images divided in 3 layers
     int **input1;
     int **input2;
@@ -128,7 +128,7 @@ int main() {
         kernel3[i]=new float [11];
     }
 
-    // random values between 0 and 1 for each kernel
+    // random values between -2 and 2 for each kernel
     for(int i=0;i<11;i++){
         for(int j=0;j<11;j++){
             kernel1[i][j]=rand()%5 -2;
@@ -156,7 +156,7 @@ int main() {
         conv3[i]=new float [55];
     }
     
-    // zero values in conv output matrix
+    // inizialize convolutional matrix with only zero values
     for(int i=0;i<55;i++){
         for(int j=0;j<55;j++){
             conv1[i][j]=0;
@@ -166,6 +166,8 @@ int main() {
     }
 
 
+
+    // LAYER 1
     // convolution between input image layers and kernels
     convolution(input1,kernel1,conv1,224,11,55,1);
     convolution(input2,kernel2,conv2,224,11,55,1);
@@ -175,4 +177,14 @@ int main() {
     relu(conv1,55);
     relu(conv2,55);
     relu(conv3,55);
+
+
+    // LAYER 2
+    // convolution between layer 1 and kernels
+
+    // ReLU nonlinearity
+
+    // overlapped max-pooling
+    
+     
 }
