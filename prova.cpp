@@ -7,10 +7,6 @@
 using namespace std;
 
 
-/*  1. filter dimension in max-pooling
-    2. passing random dimension matrix to convolution function
-    3. determine the number of neurons -> size of hidden layers
-    4. apply relu */
 
 /* convolution function
    input: input matrix, kernel matrix, output matrix, size of input, kernel and output matrices and the bias */
