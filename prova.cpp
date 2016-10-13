@@ -8,35 +8,68 @@ using namespace std;
 
 /*  1. filter dimension in max-pooling
     2. passing random dimension matrix to convolution function
-    3. determine the number of neurons -> size of hidden layers */
+    3. determine the number of neurons -> size of hidden layers
+    4. apply relu */
 
-// convolution function: takes in input the input matrix, the kernel matrix and the output
-void convolution(int input[224][224], float kernel[11][11], float layer_conv[224][224], int size, int ksize, int bias){
+/* convolution function
+   input: input matrix, kernel matrix, output matrix, size of input, kernel and output matrices and the bias */
+void convolution(int input[224][224], float kernel[11][11], float output[55][55], int bias){
     
-    int ki,kj=(size - (int)(size/ksize) * ksize) / 2;
 
-    for(int i=0;i<size;i++){
+    // determine the size of input, kernel and output rows and columns
+    int isize=sizeof(input[0])/sizeof(int);
+    int ksize=sizeof(kernel[0])/sizeof(int);
+    int osize=sizeof(output[0])/sizeof(int);
+    
+    int stride=(isize - (int)(isize/ksize) * ksize);
+    int iy,ix;  // input y and x
 
-        for(int j=0;j<size;j++){
+    for(int oy=0;oy<osize;oy++){
 
-            layer_conv[i][j]=input[i][j]*kernel[ki][kj]+bias;
+        iy=oy*stride;
+        for(int ox=0;ox<osize;ox++){
+            
+            ix=ox*stride;
+            for(int ky=0;ky<ksize;ky++){
 
-            kj++;
-            if(kj>=ksize)
-                kj=0;
+                for(int kx=0;kx<ksize;kx++){
+
+                    output[oy][ox] += input[iy][ix] * kernel[ky][kx] + bias;
+                    ix++;
+                }
+                ix=ox*stride;
+                iy++;
+            }
+            iy=oy*stride;
         }
-
-        kj=2;
-        ki++;
-        if(ki>=ksize)
-            ki=0;
     }
+
 }
 
 
-// overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
-void maxpooling(int conv[224][224], int layer2[48][48], int csize, int size){
-    //filter dimension ???
+
+/* overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
+   input: input matrix, output matrix, the size of both them, the size of the pooling matrix and the stride */
+void maxpooling(int input[28][28], int output[14][14], int p, int stride){    // overlapping if: stride < p
+    
+    // determine the size of input and output rows and columns
+    int isize=sizeof(input[0])/sizeof(int);
+    int osize=sizeof(output[0])/sizeof(int);
+    
+    for(int oy=0;oy<osize;oy++){
+
+        for(int ox=0;ox<osize;ox++){
+
+            for(int fy=oy*stride;fy<p*stride;fy++){
+
+                for(int fx=ox*stride;fx<p*stride;fx++){
+
+                    output[oy][ox]=max(output[oy][ox], input[fy][fx]);
+                }
+            }
+        }
+    }
+
 }
 
 
@@ -56,9 +89,9 @@ int main() {
     int bias = 1;
 
     // output of convolutional operation between input and kernel
-    float conv1[224][224];
-    float conv2[224][224];
-    float conv3[224][224];
+    float conv1[55][55];
+    float conv2[55][55];
+    float conv3[55][55];
 
 
     // random bit values for each image layer
@@ -79,11 +112,18 @@ int main() {
         }
     }
 
+    // zero values in conv output matrix
+    for(int i=0;i<55;i++){
+        for(int j=0;j<55;j++){
+            conv1[i][j]=0;
+            conv2[i][j]=0;
+            conv3[i][j]=0;
+        }
+    }
+
 
     // convolution between input image layers matrices and kernels
-    convolution(input1,kernel1,conv1,224,11,bias);
-    convolution(input2,kernel2,conv2,224,11,bias);
-    convolution(input3,kernel3,conv3,224,11,bias);
-
-
+    convolution(input1,kernel1,conv1,bias);
+    convolution(input2,kernel2,conv2,bias);
+    convolution(input3,kernel3,conv3,bias);
 }
