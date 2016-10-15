@@ -11,15 +11,15 @@ using namespace std;
 
 
 /* convolution function
-   input: input matrix, kernel matrix, output matrix, size of input, kernel and output matrices, the bias and the number fo features */
-void convolution(int*** input, float**** kernel, float*** output, int isize, int ksize, int osize, int bias, int feat){
+   input: input matrix, kernel matrix, output matrix, size of input, kernel  and their depth and size of output, the bias and the number of features */
+void convolution(int*** input, float**** kernel, float*** output, int isize, int ksize, int depth, int osize, int bias, int feat){
     
     int stride=(isize - (int)(isize/ksize) * ksize);
     int iy,ix;  // input y and x coordinates
-    float acc[3][osize][osize];  // output of the convolution between each layer of input and each layer of kernel (55x55x3)
+    float acc[depth][osize][osize];  // output of the convolution between each layer of input and each layer of kernel (55x55x3)
 
     // initialization of the accumulator acc
-    for(int i=0;i<3;i++){
+    for(int i=0;i<depth;i++){
         for(int j=0;j<osize;j++){
             for(int k=0;k<osize;k++){
                 acc[i][j][k]=0;
@@ -27,9 +27,10 @@ void convolution(int*** input, float**** kernel, float*** output, int isize, int
         }
     }
 
+    // convolution
     for(int f=0;f<feat;f++){
 
-        for(int i=0;i<3;i++){
+        for(int i=0;i<depth;i++){
 
             for(int oy=0;oy<osize;oy++){
 
@@ -57,8 +58,9 @@ void convolution(int*** input, float**** kernel, float*** output, int isize, int
     for(int f=0;f<feat;f++){
         for(int i=0;i<osize;i++){
             for(int j=0;j<osize;j++){
-
-                output[f][i][j] = acc[0][i][j] + acc[1][i][j] + acc[2][i][j];
+                for(int d=0;d<depth;d++){
+                    output[f][i][j] += acc[d][i][j];
+                }
             }
         }
     }
@@ -88,9 +90,9 @@ void relu(float*** relu, int size,int feat){
 
 /* overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
    input: input matrix, output matrix, the size of both them, the size of the pooling matrix and the stride */
-void maxpooling(int*** input, int*** output, int isize, int osize, int p, int stride){    // overlapping if: stride < p
+void maxpooling(int*** input, int*** output, int isize, int idepth, int osize, int p, int stride){    // overlapping if: stride < p
     
-    for(int i=0;i<3;i++){
+    for(int i=0;i<idepth;i++){
 
         for(int oy=0;oy<osize;oy++){
 
@@ -119,7 +121,7 @@ int main() {
     const int feat=1;
 
     // to pass matrices of different dimensions to a function we use a pointer of pointers
-    // input images divided in 3 layers
+    // input images divided in 3 layers (224x224x3)
     int ***input;
 
     input=new int **[3];
@@ -145,7 +147,7 @@ int main() {
     }
 
 
-    // 3 kernels which will convolved on the 3 image matrices
+    // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat)
     float ****kernel;
     
     kernel=new float ***[feat];
@@ -177,7 +179,7 @@ int main() {
     }
 
 
-    // output of convolutional operation between input and kernel of layer 1
+    // output of convolutional operation between input and kernel of layer 1 (55x55xfeat)
     float ***layer1;
     
     layer1=new float **[feat];
@@ -205,7 +207,7 @@ int main() {
 
     // LAYER 1
     // convolution between input image layers and kernels
-    convolution(input,kernel,layer1,224,11,55,1,feat);
+    convolution(input,kernel,layer1,224,11,3,55,1,feat);
     
     // ReLU nonlinearity
     relu(layer1,55,feat);
