@@ -7,32 +7,23 @@
 
 using namespace std;
 
-// THE NUMBER OF FEATURES IS 1
-
-
 
 /* convolution function
-   input: input matrix, kernel matrix, output matrix, size of input, kernel  and their depth and size of output, the bias and the number of features */
-void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> output, int isize, int ksize, int depth, int osize, int bias, int feat){
+   input: input matrix, kernel matrix, output matrix, the stride and the bias */
+void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> output, int stride, int bias){
     
-    int stride=(isize - (int)(isize/ksize) * ksize);
     int iy,ix;  // input y and x coordinates
-    float acc[depth][osize][osize];  // output of the convolution between each layer of input and each layer of kernel (55x55x3)
+    int feat=output.size();
+    int depth=input.size();
+    int isize=input[0].size();
+    int ksize=kernel[0].size();
+    int osize=output[0].size();
 
-    // initialization of the accumulator acc
-    for(int i=0;i<depth;i++){
-        for(int j=0;j<osize;j++){
-            for(int k=0;k<osize;k++){
-                acc[i][j][k]=0;
-            }
-        }
-    }
+    for(int f=0;f<feat;f++){    // for each feature
 
-    // convolution
-    for(int f=0;f<feat;f++){
+        for(int i=0;i<depth;i++){   // for each depth level
 
-        for(int i=0;i<depth;i++){
-
+            // 2d-convolution
             for(int oy=0;oy<osize;oy++){
 
                 iy=oy*stride;
@@ -43,7 +34,7 @@ void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<
 
                         for(int kx=0;kx<ksize;kx++){
 
-                            acc[i][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx] + bias;
+                            output[f][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx] + bias;
                             ix++;
                         }
                         ix=ox*stride;
@@ -55,24 +46,16 @@ void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<
         }
     }
 
-    // sum each element on same position to convert 55x55x3 acc into 55x55x1 output
-    for(int f=0;f<feat;f++){
-        for(int i=0;i<osize;i++){
-            for(int j=0;j<osize;j++){
-                for(int d=0;d<depth;d++){
-                    output[f][i][j] += acc[d][i][j];
-                }
-            }
-        }
-    }
-
 }
 
 
 
 /* ReLU non-linear function: apply the ReLU nonlinear function f(x)=max(0,x) to each input value
-   input: matrix on which applying ReLU function, size of matrix and number of features*/
-void relu(vector<vector<vector<float>>> relu, int size,int feat){
+   input: matrix on which applying ReLU function */
+void relu(vector<vector<vector<float>>> relu){
+
+    int feat=relu.size();
+    int size=relu[0].size();
 
     for(int f=0;f<feat;f++){
 
@@ -90,10 +73,14 @@ void relu(vector<vector<vector<float>>> relu, int size,int feat){
 
 
 /* overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
-   input: input matrix, output matrix, the size of both them, the size of the pooling matrix and the stride */
-void maxpooling(vector<vector<vector<int>>> input, vector<vector<vector<int>>> output, int isize, int idepth, int osize, int p, int stride){    // overlapping if: stride < p
+   input: input matrix, output matrix, dimension of the overlapping pooling matrix and the stride */
+void maxpooling(vector<vector<vector<int>>> input, vector<vector<vector<int>>> output, int p, int stride){    // overlapping if: stride < p
     
-    for(int i=0;i<idepth;i++){
+    int feat=input.size();
+    int isize=input[0].size();
+    int osize=output[0].size();
+
+    for(int f=0;f<feat;f++){
 
         for(int oy=0;oy<osize;oy++){
 
@@ -103,7 +90,7 @@ void maxpooling(vector<vector<vector<int>>> input, vector<vector<vector<int>>> o
 
                     for(int fx=ox*stride;fx<p*stride;fx++){
 
-                        output[i][oy][ox] = max(output[i][oy][ox], input[i][fy][fx]);
+                        output[f][oy][ox] = max(output[f][oy][ox], input[f][fy][fx]);
                     }
                 }
             }
@@ -173,14 +160,18 @@ int main() {
 
 
     // LAYER 1
+
+    int stride = (input[0].size() - (int)(input[0].size()/kernel[0].size()) * kernel[0].size());
+
     // convolution between input image layers and kernels
-    convolution(input,kernel,layer1,224,11,3,55,1,feat);
+    convolution(input,kernel,layer1,stride,1);
     
     // ReLU nonlinearity
-    relu(layer1,55,feat);
+    relu(layer1);
 
 
     // LAYER 2
+
     // convolution between layer 1 and kernels
 
     // ReLU nonlinearity
