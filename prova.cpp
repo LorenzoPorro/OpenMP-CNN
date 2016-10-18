@@ -111,8 +111,8 @@ int main() {
 
     // to pass matrices of different dimensions to a function we use a pointer of pointers
     // input images divided in 3 layers (224x224x3)
-    vector<vector<vector<int>>> input(3, vector<vector<int>>(11, vector<int>(11)));
-
+    vector<vector<vector<int>>> input(3, vector<vector<int>>(224, vector<int>(224)));
+    
     // random bit values for each image layer
     for(int i=0;i<3;i++){
 
@@ -125,13 +125,11 @@ int main() {
         }
     }
 
-
     // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat)
     vector<vector<vector<vector<float>>>> kernel(feat, vector<vector<vector<float>>>(3, vector<vector<float>>(11, vector<float>(11))));
 
     
     // random values between -2 and 2 for each kernel
-    
     for(int f=0;f<feat;f++){
         for(int i=0;i<3;i++){
             for(int j=0;j<11;j++){
@@ -168,7 +166,7 @@ int main() {
     
     // ReLU nonlinearity
     relu(layer1);
-
+    
 
     // LAYER 2
 
@@ -177,4 +175,5 @@ int main() {
     // ReLU nonlinearity
 
     // overlapped max-pooling
+
 }
