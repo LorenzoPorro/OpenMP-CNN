@@ -108,10 +108,6 @@ void maxpooling(vector<vector<vector<int>>> input, vector<vector<vector<int>>> o
 int main() {
 
 
-    // number of features
-    const int feat=1;
-
-    // to pass matrices of different dimensions to a function we use a pointer of pointers
     // input images divided in 3 layers (224x224x3)
     vector<vector<vector<int>>> input(3, vector<vector<int>>(224, vector<int>(224)));
     
@@ -126,6 +122,13 @@ int main() {
             }
         }
     }
+
+
+
+    // LAYER 1
+
+    // number of features
+    const int feat1=48;
 
     // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat)
     vector<vector<vector<vector<float>>>> kernel(feat, vector<vector<vector<float>>>(3, vector<vector<float>>(11, vector<float>(11))));
@@ -157,11 +160,6 @@ int main() {
     }
 
 
-
-
-
-    // LAYER 1
-
     int stride = (input[0].size() - (int)(input[0].size()/kernel[0].size()) * kernel[0].size());
 
     // convolution between input image layers and kernels
@@ -173,8 +171,10 @@ int main() {
 
     // LAYER 2
 
+
+
     // convolution between layer 1 and kernels
-    
+
     // ReLU nonlinearity
 
     // overlapped max-pooling
