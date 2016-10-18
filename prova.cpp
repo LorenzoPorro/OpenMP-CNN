@@ -7,8 +7,6 @@
 
 using namespace std;
 
-/*TODO
-    1. COMPUTE THE STRIDE (line 164) */
 
 /* convolution function
    input: input matrix, kernel matrix, output matrix, the stride and the bias */
@@ -37,8 +35,10 @@ vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, v
                         
                         for(int kx=0;kx<ksize;kx++){
                             
-                            if(ix<stride*osize)
-                            output[f][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx] + bias;
+                            // check if the kernel goes outside the input matrix
+                            if(ky*oy<osize && kx*ox<osize){
+                                output[f][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx] + bias;
+                            }
                             ix++;
                         }
                         ix=ox*stride;
@@ -165,7 +165,7 @@ int main() {
 
 
     //int stride1 = (input[0].size() - (int)(input[0].size()/kernel1[0][0].size()) * kernel1[0][0].size());
-    int stride1 = (input[0].size() - kernel1[0][0].size())/(layer1[0].size()-1);
+    int stride1 = round((input[0].size() - kernel1[0][0].size())/(layer1[0].size()-1));
     
     // convolution between input image layers and kernels
     layer1 = convolution(input,kernel1,layer1,stride1,1);
@@ -209,7 +209,7 @@ int main() {
     }
     
     // convolution between layer 1 and kernels of layer 2
-    int stride2 = (layer1[0].size() - kernel2[0][0].size())/(layer2[0].size()-1);
+    int stride2 = round((layer1[0].size() - kernel2[0][0].size())/(layer2[0].size()-1));
     
     // convolution between input image layers and kernels
     layer2 = convolution(layer1,kernel2,layer2,stride2,1);
