@@ -10,7 +10,7 @@ using namespace std;
 
 /* convolution function
    input: input matrix, kernel matrix, output matrix, the stride and the bias */
-void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> output, int stride, int bias){
+vector<vector<vector<float>>> convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> output, int stride, int bias){
     
     int iy,ix;  // input y and x coordinates
     int feat=output.size();
@@ -46,13 +46,14 @@ void convolution(vector<vector<vector<int>>> input, vector<vector<vector<vector<
         }
     }
 
+    return output;
 }
 
 
 
 /* ReLU non-linear function: apply the ReLU nonlinear function f(x)=max(0,x) to each input value
    input: matrix on which applying ReLU function */
-void relu(vector<vector<vector<float>>> relu){
+vector<vector<vector<float>>> relu(vector<vector<vector<float>>> relu){
 
     int feat=relu.size();
     int size=relu[0].size();
@@ -62,12 +63,13 @@ void relu(vector<vector<vector<float>>> relu){
         for(int i=0;i<size;i++){
 
             for(int j=0;j<size;j++){
-
+                
                 relu[f][i][j]=max((float)0, relu[f][i][j]);
             }
         }
     }
-        
+
+    return relu;   
 }
 
 
@@ -127,14 +129,13 @@ int main() {
 
     // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat)
     vector<vector<vector<vector<float>>>> kernel(feat, vector<vector<vector<float>>>(3, vector<vector<float>>(11, vector<float>(11))));
-
     
     // random values between -2 and 2 for each kernel
     for(int f=0;f<feat;f++){
         for(int i=0;i<3;i++){
             for(int j=0;j<11;j++){
                 for(int k=0;k<11;k++){
-
+                    
                     kernel[f][i][j][k]=rand()%5 - 2;
                 }
             }
@@ -157,15 +158,17 @@ int main() {
 
 
 
+
+
     // LAYER 1
 
     int stride = (input[0].size() - (int)(input[0].size()/kernel[0].size()) * kernel[0].size());
 
     // convolution between input image layers and kernels
-    convolution(input,kernel,layer1,stride,1);
-    
+    layer1 = convolution(input,kernel,layer1,stride,1);
+
     // ReLU nonlinearity
-    relu(layer1);
+    layer1 = relu(layer1);
     
 
     // LAYER 2
