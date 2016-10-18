@@ -174,7 +174,7 @@ int main() {
     // LAYER 2
 
     // convolution between layer 1 and kernels
-
+    
     // ReLU nonlinearity
 
     // overlapped max-pooling
