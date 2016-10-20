@@ -207,10 +207,84 @@ int main() {
     
     // overlapped max-pooling    
     layer2 = maxpooling(conv2,layer2);
-    cout<<"end layer2 pool"<<endl;
+
 
 
     // LAYER 3
 
+    // number of features
+    const int feat3=1;
+
+    // kernel (3x3xfeat2xfeat3)
+    vector<vector<vector<vector<float>>>> kernel3(feat3, vector<vector<vector<float>>>(feat2, vector<vector<float>>(3, vector<float>(3))));
     
+    // random values between -2 and 2 for each kernel
+    for(int f=0;f<feat3;f++){
+        for(int i=0;i<feat2;i++){
+            for(int j=0;j<3;j++){
+                for(int k=0;k<3;k++){
+                    
+                    kernel3[f][i][j][k]=rand()%5 - 2;
+                }
+            }
+        }
+    }
+
+    // output of convolutional operation between layer2 and kernel of layer 3 (27x27xfeat3)
+    vector<vector<vector<float>>> conv3(feat3, vector<vector<float>>(27, vector<float>(27)));
+
+    // output of overlapped max-pooling operation (13x13xfeat3)
+    vector<vector<vector<float>>> layer3(feat3, vector<vector<float>>(13, vector<float>(13)));
+
+
+    int stride3 = round((float)(layer2[0].size() - kernel3[0][0].size())/(conv3[0].size()-1));
+    
+    // convolution between layer 2 and kernels of layer 3
+    conv3 = convolution(layer2,kernel3,conv3,stride3);
+
+    // ReLU nonlinearity
+    conv3 = relu(conv3);
+
+    // overlapped max-pooling    
+    layer3 = maxpooling(conv3,layer3);
+
+
+
+    // LAYER 4
+
+    // number of features
+    const int feat4=1;
+
+    // kernel (3x3xfeat3xfeat4)
+    vector<vector<vector<vector<float>>>> kernel4(feat4, vector<vector<vector<float>>>(feat3, vector<vector<float>>(3, vector<float>(3))));
+
+    // random values between -2 and 2 for each kernel
+    for(int f=0;f<feat4;f++){
+        for(int i=0;i<feat3;i++){
+            for(int j=0;j<3;j++){
+                for(int k=0;k<3;k++){
+                    
+                    kernel4[f][i][j][k]=rand()%5 - 2;
+                }
+            }
+        }
+    }
+
+    // output of convolutional operation between layer3 and kernel of layer 4 (13x13xfeat4)
+    vector<vector<vector<float>>> layer4(feat4, vector<vector<float>>(13, vector<float>(13)));
+
+
+    int stride4 = round((float)(layer3[0].size() - kernel4[0][0].size())/(layer4[0].size()-1));
+    cout<<stride4<<endl;
+    // convolution between layer 2 and kernels of layer 3
+    layer4 = convolution(layer3,kernel4,layer4,stride4);
+
+    // ReLU nonlinearity
+    layer4 = relu(layer4);
+
+
+
+    // LAYER 5
+    cout<<"end layer5"<<endl;
+
 }
