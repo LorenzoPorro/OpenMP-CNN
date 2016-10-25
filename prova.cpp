@@ -40,7 +40,7 @@ vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, v
                             
                             // check if the kernel goes outside the input matrix
                             if(ky*oy<isize && kx*ox<isize && iy<isize && ix<isize){
-                                output[f][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx] + bias;
+                                output[f][oy][ox] += input[i][iy][ix] * kernel[f][i][ky][kx];
                             }
                             ix++;
                         }
@@ -48,6 +48,7 @@ vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, v
                         iy++;
                     }
                     iy=oy*stride;
+                    output[f][oy][ox] += 1;
                 }
             }
         }
@@ -245,7 +246,7 @@ int main() {
     // ReLU nonlinearity
     conv3 = relu(conv3);
     
-    // overlapped max-pooling    
+    // overlapped max-pooling
     layer3 = maxpooling(conv3,layer3);
     
 
@@ -314,7 +315,77 @@ int main() {
     
     // ReLU nonlinearity
     layer5 = relu(layer5);
+
+
     
-    cout<<"end layer5"<<endl;
+    // LAYER 6 - FULLY-CONNECTED
+
+    // layer 6 fully-connected
+    vector<float> layer6(2048);
+
+    // overlapped max-pooling (layer5 -> 6x6xfeat5)
+    vector<vector<vector<float>>> pool6(feat5, vector<vector<float>>(6, vector<float>(6)));
+
+    pool6 = maxpooling(layer5,pool6);
+
+    // weights matrix (2048 weights x 6x6xfeat5 input neurons)
+    vector<vector<vector<vector<float>>>> weight6(2048, vector<vector<vector<float>>>(feat5, vector<vector<float>>(6, vector<float>(6))));
+
+    // random values between -2 and 2 for each kernel
+    for(int f=0;f<2048;f++){
+        for(int i=0;i<feat5;i++){
+            for(int j=0;j<6;j++){
+                for(int k=0;k<6;k++){
+                    
+                    weight6[f][i][j][k]=rand()%5 - 2;
+                }
+            }
+        }
+    }
+
+    // from layer5 to fully-connected layer6
+    for(int i=0;i<2048;i++){
+
+        for(int j=0; j<feat5;j++){
+
+            for(int k=0;k<6;k++){
+
+                for(int l=0;l<6;l++){
+
+                    layer6[i] = weight6[i][j][k][l]*pool6[j][k][l];
+                }
+            }
+        }
+        layer6[i]+=1;
+    }
+    
+
+
+
+    // LAYER 7
+
+    // layer 7 fully-connected
+    vector<float> layer7(2048);
+
+    // weights matrix (2048 weights x 6x6xfeat5 input neurons)
+    vector<float> weight7(2048);
+
+    // random values between -2 and 2 for each kernel
+    for(int i=0;i<2048;i++){
+                    
+        weight7[i]=rand()%5 - 2;
+    }
+
+    // from layer6 to layer 7
+    for(int i=0;i<2048;i++){
+
+        for(int j=0;j<2048;j++){
+
+            layer7[i] = weight7[j]*layer6[j];
+        }
+        layer7[i]+=1;
+    }
+
+    cout<<"end layer7"<<endl;
 
 }
