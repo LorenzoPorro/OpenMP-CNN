@@ -33,8 +33,8 @@ vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<ve
 }
 
 int main(){
-    vector<vector<int>> m1 { {1,2}, {3,4} };
-    vector<vector<int>> m2 { {1,1}, {1,1} };
+    vector<vector<int>> m1 { {1,2,3}, {4,5,6}, {7,8,9} };
+    vector<vector<int>> m2 { {1,1,1}, {1,1,1}, {1,1,1@} };
     int i,j;
     int count = 0;
     vector<vector<int>> up = upsample(m1,m2);
