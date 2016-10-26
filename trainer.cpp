@@ -3,7 +3,7 @@
 
 using namespace std;
 
-vector < vector < int > > upsample(vector < vector < int > > &backPropagatedError, vector < vector < int > > &derivativeOfAggregation){
+vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
     int height1 = backPropagatedError.size();
     int width1 = backPropagatedError[0].size();
     int height2 = derivativeOfAggregation.size();
@@ -13,7 +13,7 @@ vector < vector < int > > upsample(vector < vector < int > > &backPropagatedErro
     cout << "w1: " << width1 << endl;
     cout << "w2: " << width2 << endl;
     int row,column;
-    vector< vector< int > > upsampleWeightMatrix(height1*height2, vector < int >(width1*width2));
+    vector<vector<int>> upsampleWeightMatrix(height1*height2, vector<int>(width1*width2));
     cout << "vec init" << endl;
     for(int i=0;i<height1;i++){
         for(int j=0;j<width1;j++){
@@ -33,11 +33,11 @@ vector < vector < int > > upsample(vector < vector < int > > &backPropagatedErro
 }
 
 int main(){
-    vector< vector < int > > m1 { {1,2}, {3,4} };
-    vector< vector < int > > m2 { {1,1}, {1,1} };
+    vector<vector<int>> m1 { {1,2}, {3,4} };
+    vector<vector<int>> m2 { {1,1}, {1,1} };
     int i,j;
     int count = 0;
-    vector< vector < int > > up = upsample(m1,m2);
+    vector<vector<int>> up = upsample(m1,m2);
     for(i=0;i<up.size();i++){
         for(j=0;j<up.size();j++){
             count += 1;
