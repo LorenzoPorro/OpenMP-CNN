@@ -8,13 +8,12 @@
 using namespace std;
 
 
-/*TODO
-    - improve code like functions' types and outputs */
 
 /* convolution function
    input: input matrix, kernel matrix, output matrix, the stride */
-vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> output, int stride){
+void convolution(vector<vector<vector<float>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> &output, int stride){
     
+
     int bias=1;
     int iy,ix;  // input y and x coordinates
     int feat=output.size();
@@ -22,6 +21,7 @@ vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, v
     int isize=input[0].size();
     int ksize=kernel[0][0].size();
     int osize=output[0].size();
+
 
     for(int f=0;f<feat;f++){    // for each feature
     
@@ -53,15 +53,14 @@ vector<vector<vector<float>>> convolution(vector<vector<vector<float>>> input, v
             }
         }
     }
-    
-    return output;
+
 }
 
 
 
 /* ReLU non-linear function: apply the ReLU nonlinear function f(x)=max(0,x) to each input value
    input: matrix on which applying ReLU function */
-vector<vector<vector<float>>> relu(vector<vector<vector<float>>> relu){
+void relu(vector<vector<vector<float>>> &relu){
 
     int feat=relu.size();
     int size=relu[0].size();
@@ -77,14 +76,13 @@ vector<vector<vector<float>>> relu(vector<vector<vector<float>>> relu){
         }
     }
 
-    return relu;   
 }
 
 
 
 /* overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
    input: input matrix, output matrix, dimension of the overlapping pooling matrix and the stride */
-vector<vector<vector<float>>> maxpooling(vector<vector<vector<float>>> input, vector<vector<vector<float>>> output){
+void maxpooling(vector<vector<vector<float>>> input, vector<vector<vector<float>>> &output){
     
     int p=3;    // max-pooling matrix size (3x3)
     int stride=2;   // overlapping: stride < p
@@ -109,9 +107,7 @@ vector<vector<vector<float>>> maxpooling(vector<vector<vector<float>>> input, ve
         }
     }
 
-    return output;
 }
-
 
 
 
@@ -139,7 +135,7 @@ int main() {
     // LAYER 1
 
     // number of features
-    const int feat1=1;
+    const int feat1=48;
 
     // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat1)
     vector<vector<vector<vector<float>>>> kernel1(feat1, vector<vector<vector<float>>>(3, vector<vector<float>>(11, vector<float>(11))));
@@ -163,18 +159,19 @@ int main() {
 
     int stride1 = round((float)(input[0].size() - kernel1[0][0].size())/(layer1[0].size()-1));
     
+    
     // convolution between input image layers and kernels
-    layer1 = convolution(input,kernel1,layer1,stride1);
+    convolution(input,kernel1,layer1,stride1);
     
     // ReLU nonlinearity
-    layer1 = relu(layer1);
+    relu(layer1);
     
 
 
     // LAYER 2
 
     // number of features
-    const int feat2=1;
+    const int feat2=128;
 
     // kernel (5x5xfeat1xfeat2)
     vector<vector<vector<vector<float>>>> kernel2(feat2, vector<vector<vector<float>>>(feat1, vector<vector<float>>(5, vector<float>(5))));
@@ -201,20 +198,20 @@ int main() {
     int stride2 = round((float)(layer1[0].size() - kernel2[0][0].size())/(conv2[0].size()-1));
     
     // convolution between layer 1 and kernels of layer 2
-    conv2 = convolution(layer1,kernel2,conv2,stride2);
+    convolution(layer1,kernel2,conv2,stride2);
     
     // ReLU nonlinearity
-    conv2 = relu(conv2);
+    relu(conv2);
     
     // overlapped max-pooling    
-    layer2 = maxpooling(conv2,layer2);
-
+    maxpooling(conv2,layer2);
+    
 
 
     // LAYER 3
 
     // number of features
-    const int feat3=1;
+    const int feat3=192;
 
     // kernel (3x3xfeat2xfeat3)
     vector<vector<vector<vector<float>>>> kernel3(feat3, vector<vector<vector<float>>>(feat2, vector<vector<float>>(3, vector<float>(3))));
@@ -241,20 +238,20 @@ int main() {
     int stride3 = round((float)(layer2[0].size() - kernel3[0][0].size())/(conv3[0].size()-1));
     
     // convolution between layer 2 and kernels of layer 3
-    conv3 = convolution(layer2,kernel3,conv3,stride3);
+    convolution(layer2,kernel3,conv3,stride3);
     
     // ReLU nonlinearity
-    conv3 = relu(conv3);
+    relu(conv3);
     
     // overlapped max-pooling
-    layer3 = maxpooling(conv3,layer3);
+    maxpooling(conv3,layer3);
     
 
 
     // LAYER 4
 
     // number of features
-    const int feat4=1;
+    const int feat4=192;
 
     // kernel (3x3xfeat3xfeat4)
     vector<vector<vector<vector<float>>>> kernel4(feat4, vector<vector<vector<float>>>(feat3, vector<vector<float>>(3, vector<float>(3))));
@@ -278,17 +275,17 @@ int main() {
     int stride4 = round((float)(layer3[0].size() - kernel4[0][0].size())/(layer4[0].size()-1));
     
     // convolution between layer 3 and kernels of layer 4
-    layer4 = convolution(layer3,kernel4,layer4,stride4);
+    convolution(layer3,kernel4,layer4,stride4);
     
     // ReLU nonlinearity
-    layer4 = relu(layer4);
+    relu(layer4);
     
 
 
     // LAYER 5
 
     // number of features
-    const int feat5=1;
+    const int feat5=128;
 
     // kernel (3x3xfeat3xfeat4)
     vector<vector<vector<vector<float>>>> kernel5(feat5, vector<vector<vector<float>>>(feat4, vector<vector<float>>(3, vector<float>(3))));
@@ -311,10 +308,11 @@ int main() {
     int stride5 = round((float)(layer4[0].size() - kernel5[0][0].size())/(layer5[0].size()-1));
     
     // convolution between layer 4 and kernels of layer 5
-    layer5 = convolution(layer4,kernel5,layer5,stride5);
+    convolution(layer4,kernel5,layer5,stride5);
     
     // ReLU nonlinearity
-    layer5 = relu(layer5);
+    relu(layer5);
+    
 
 
     
@@ -325,9 +323,9 @@ int main() {
 
     // overlapped max-pooling (layer5 -> 6x6xfeat5)
     vector<vector<vector<float>>> pool6(feat5, vector<vector<float>>(6, vector<float>(6)));
-
-    pool6 = maxpooling(layer5,pool6);
-
+    
+    maxpooling(layer5,pool6);
+    
     // weights matrix (2048 weights x 6x6xfeat5 input neurons)
     vector<vector<vector<vector<float>>>> weight6(2048, vector<vector<vector<float>>>(feat5, vector<vector<float>>(6, vector<float>(6))));
 
@@ -359,7 +357,7 @@ int main() {
         layer6[i]+=1;
     }
     
-
+    
 
 
     // LAYER 7
@@ -386,6 +384,6 @@ int main() {
         layer7[i]+=1;
     }
 
-    cout<<"end layer7"<<endl;
+    cout<<"end"<<endl;
 
 }
