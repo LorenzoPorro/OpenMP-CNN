@@ -10,11 +10,10 @@ using namespace std;
 
 
 /* convolution function
-   input: input matrix, kernel matrix, output matrix, the stride */
-void convolution(vector<vector<vector<float>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> &output, int stride){
+   input: input matrix, kernel matrix, output matrix, the stride and the bias */
+void convolution(vector<vector<vector<float>>> input, vector<vector<vector<vector<float>>>> kernel, vector<vector<vector<float>>> &output, int stride, int bias){
     
 
-    int bias=1;
     int iy,ix;  // input y and x coordinates
     int feat=output.size();
     int depth=input.size();
@@ -48,7 +47,7 @@ void convolution(vector<vector<vector<float>>> input, vector<vector<vector<vecto
                         iy++;
                     }
                     iy=oy*stride;
-                    output[f][oy][ox] += 1;
+                    output[f][oy][ox] += bias;
                 }
             }
         }
@@ -161,7 +160,7 @@ int main() {
     
     
     // convolution between input image layers and kernels
-    convolution(input,kernel1,layer1,stride1);
+    convolution(input,kernel1,layer1,stride1,0);
     
     // ReLU nonlinearity
     relu(layer1);
@@ -198,7 +197,7 @@ int main() {
     int stride2 = round((float)(layer1[0].size() - kernel2[0][0].size())/(conv2[0].size()-1));
     
     // convolution between layer 1 and kernels of layer 2
-    convolution(layer1,kernel2,conv2,stride2);
+    convolution(layer1,kernel2,conv2,stride2,1);
     
     // ReLU nonlinearity
     relu(conv2);
@@ -238,7 +237,7 @@ int main() {
     int stride3 = round((float)(layer2[0].size() - kernel3[0][0].size())/(conv3[0].size()-1));
     
     // convolution between layer 2 and kernels of layer 3
-    convolution(layer2,kernel3,conv3,stride3);
+    convolution(layer2,kernel3,conv3,stride3,0);
     
     // ReLU nonlinearity
     relu(conv3);
@@ -275,7 +274,7 @@ int main() {
     int stride4 = round((float)(layer3[0].size() - kernel4[0][0].size())/(layer4[0].size()-1));
     
     // convolution between layer 3 and kernels of layer 4
-    convolution(layer3,kernel4,layer4,stride4);
+    convolution(layer3,kernel4,layer4,stride4,1);
     
     // ReLU nonlinearity
     relu(layer4);
@@ -308,7 +307,7 @@ int main() {
     int stride5 = round((float)(layer4[0].size() - kernel5[0][0].size())/(layer5[0].size()-1));
     
     // convolution between layer 4 and kernels of layer 5
-    convolution(layer4,kernel5,layer5,stride5);
+    convolution(layer4,kernel5,layer5,stride5,1);
     
     // ReLU nonlinearity
     relu(layer5);
@@ -355,6 +354,7 @@ int main() {
             }
         }
         layer6[i]+=1;
+        layer6[i] = max((float)0, layer6[i]);   // ReLU function
     }
     
     
@@ -382,6 +382,7 @@ int main() {
             layer7[i] = weight7[j]*layer6[j];
         }
         layer7[i]+=1;
+        layer7[i] = max((float)0, layer7[i]);   // ReLU function
     }
 
     cout<<"end"<<endl;
