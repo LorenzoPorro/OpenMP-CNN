@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cmath>
+#include <random>
 #include <vector>
 
 using namespace std;
@@ -109,10 +110,42 @@ void maxpooling(vector<vector<vector<float>>> input, vector<vector<vector<float>
 }
 
 
+void f(int &i){
+    i++;
+}
 
 
 int main() {
 
+    vector<int> r(2);
+    int j=0;
+    #pragma omp parallel num_threads(2)
+    {
+        #pragma omp sections nowait
+        {
+            #pragma omp section
+            {
+                f(j);
+                r[omp_get_thread_num()]=j;
+                cout<<omp_get_thread_num()<<endl;
+            }
+
+            #pragma omp section
+            {
+                j=0;
+                f(j);
+                f(j);
+                r[omp_get_thread_num()]=j;
+                cout<<omp_get_thread_num()<<endl;
+            }
+        }
+    }
+    cout<<r[0]<<endl;
+    cout<<r[1]<<endl;
+
+    // Gaussian distribution with zero-mean and standard deviation 0.01
+    std::default_random_engine gen;
+    std::normal_distribution<float> distr(0,0.01);
 
     // input images divided in 3 layers (224x224x3)
     vector<vector<vector<float>>> input(3, vector<vector<float>>(224, vector<float>(224)));
@@ -139,13 +172,14 @@ int main() {
     // 3 kernels which will convolved on the 3 image matrices (11x11x3xfeat1)
     vector<vector<vector<vector<float>>>> kernel1(feat1, vector<vector<vector<float>>>(3, vector<vector<float>>(11, vector<float>(11))));
     
-    // random values between -2 and 2 for each kernel
+
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<feat1;f++){
         for(int i=0;i<3;i++){
             for(int j=0;j<11;j++){
                 for(int k=0;k<11;k++){
                     
-                    kernel1[f][i][j][k]=rand()%5 - 2;
+                    kernel1[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -160,10 +194,10 @@ int main() {
     
     
     // convolution between input image layers and kernels
-    convolution(input,kernel1,layer1,stride1,0);
+    //convolution(input,kernel1,layer1,stride1,0);
     
     // ReLU nonlinearity
-    relu(layer1);
+    //relu(layer1);
     
 
 
@@ -181,7 +215,7 @@ int main() {
             for(int j=0;j<5;j++){
                 for(int k=0;k<5;k++){
                     
-                    kernel2[f][i][j][k]=rand()%5 - 2;
+                    kernel2[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -197,13 +231,13 @@ int main() {
     int stride2 = round((float)(layer1[0].size() - kernel2[0][0].size())/(conv2[0].size()-1));
     
     // convolution between layer 1 and kernels of layer 2
-    convolution(layer1,kernel2,conv2,stride2,1);
+    //convolution(layer1,kernel2,conv2,stride2,1);
     
     // ReLU nonlinearity
-    relu(conv2);
+    //relu(conv2);
     
     // overlapped max-pooling    
-    maxpooling(conv2,layer2);
+    //maxpooling(conv2,layer2);
     
 
 
@@ -221,7 +255,7 @@ int main() {
             for(int j=0;j<3;j++){
                 for(int k=0;k<3;k++){
                     
-                    kernel3[f][i][j][k]=rand()%5 - 2;
+                    kernel3[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -237,13 +271,13 @@ int main() {
     int stride3 = round((float)(layer2[0].size() - kernel3[0][0].size())/(conv3[0].size()-1));
     
     // convolution between layer 2 and kernels of layer 3
-    convolution(layer2,kernel3,conv3,stride3,0);
+    //convolution(layer2,kernel3,conv3,stride3,0);
     
     // ReLU nonlinearity
-    relu(conv3);
+    //relu(conv3);
     
     // overlapped max-pooling
-    maxpooling(conv3,layer3);
+    //maxpooling(conv3,layer3);
     
 
 
@@ -261,7 +295,7 @@ int main() {
             for(int j=0;j<3;j++){
                 for(int k=0;k<3;k++){
                     
-                    kernel4[f][i][j][k]=rand()%5 - 2;
+                    kernel4[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -274,10 +308,10 @@ int main() {
     int stride4 = round((float)(layer3[0].size() - kernel4[0][0].size())/(layer4[0].size()-1));
     
     // convolution between layer 3 and kernels of layer 4
-    convolution(layer3,kernel4,layer4,stride4,1);
+    //convolution(layer3,kernel4,layer4,stride4,1);
     
     // ReLU nonlinearity
-    relu(layer4);
+    //relu(layer4);
     
 
 
@@ -295,7 +329,7 @@ int main() {
             for(int j=0;j<3;j++){
                 for(int k=0;k<3;k++){
                     
-                    kernel5[f][i][j][k]=rand()%5 - 2;
+                    kernel5[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -307,10 +341,10 @@ int main() {
     int stride5 = round((float)(layer4[0].size() - kernel5[0][0].size())/(layer5[0].size()-1));
     
     // convolution between layer 4 and kernels of layer 5
-    convolution(layer4,kernel5,layer5,stride5,1);
+    //convolution(layer4,kernel5,layer5,stride5,1);
     
     // ReLU nonlinearity
-    relu(layer5);
+    //relu(layer5);
     
 
 
@@ -323,7 +357,7 @@ int main() {
     // overlapped max-pooling (layer5 -> 6x6xfeat5)
     vector<vector<vector<float>>> pool6(feat5, vector<vector<float>>(6, vector<float>(6)));
     
-    maxpooling(layer5,pool6);
+    //maxpooling(layer5,pool6);
     
     // weights matrix (2048 weights x 6x6xfeat5 input neurons)
     vector<vector<vector<vector<float>>>> weight6(2048, vector<vector<vector<float>>>(feat5, vector<vector<float>>(6, vector<float>(6))));
@@ -334,7 +368,7 @@ int main() {
             for(int j=0;j<6;j++){
                 for(int k=0;k<6;k++){
                     
-                    weight6[f][i][j][k]=rand()%5 - 2;
+                    weight6[f][i][j][k]=distr(gen);
                 }
             }
         }
@@ -349,12 +383,12 @@ int main() {
 
                 for(int l=0;l<6;l++){
 
-                    layer6[i] = weight6[i][j][k][l]*pool6[j][k][l];
+                    //layer6[i] = weight6[i][j][k][l]*pool6[j][k][l];
                 }
             }
         }
-        layer6[i]+=1;
-        layer6[i] = max((float)0, layer6[i]);   // ReLU function
+        //layer6[i]+=1;
+        //layer6[i] = max((float)0, layer6[i]);   // ReLU function
     }
     
     
@@ -371,7 +405,7 @@ int main() {
     // random values between -2 and 2 for each kernel
     for(int i=0;i<2048;i++){
                     
-        weight7[i]=rand()%5 - 2;
+        weight7[i]=distr(gen);
     }
 
     // from layer6 to layer 7
@@ -379,10 +413,10 @@ int main() {
 
         for(int j=0;j<2048;j++){
 
-            layer7[i] = weight7[j]*layer6[j];
+            //layer7[i] = weight7[j]*layer6[j];
         }
-        layer7[i]+=1;
-        layer7[i] = max((float)0, layer7[i]);   // ReLU function
+        //layer7[i]+=1;
+        //layer7[i] = max((float)0, layer7[i]);   // ReLU function
     }
 
     cout<<"end"<<endl;
