@@ -209,7 +209,7 @@ int main() {
     // kernel (5x5xfeat1xfeat2)
     vector<vector<vector<vector<float>>>> kernel2(feat2, vector<vector<vector<float>>>(feat1, vector<vector<float>>(5, vector<float>(5))));
     
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<feat2;f++){
         for(int i=0;i<feat1;i++){
             for(int j=0;j<5;j++){
@@ -249,7 +249,7 @@ int main() {
     // kernel (3x3xfeat2xfeat3)
     vector<vector<vector<vector<float>>>> kernel3(feat3, vector<vector<vector<float>>>(feat2, vector<vector<float>>(3, vector<float>(3))));
     
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<feat3;f++){
         for(int i=0;i<feat2;i++){
             for(int j=0;j<3;j++){
@@ -289,7 +289,7 @@ int main() {
     // kernel (3x3xfeat3xfeat4)
     vector<vector<vector<vector<float>>>> kernel4(feat4, vector<vector<vector<float>>>(feat3, vector<vector<float>>(3, vector<float>(3))));
 
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<feat4;f++){
         for(int i=0;i<feat3;i++){
             for(int j=0;j<3;j++){
@@ -323,7 +323,7 @@ int main() {
     // kernel (3x3xfeat3xfeat4)
     vector<vector<vector<vector<float>>>> kernel5(feat5, vector<vector<vector<float>>>(feat4, vector<vector<float>>(3, vector<float>(3))));
 
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<feat5;f++){
         for(int i=0;i<feat4;i++){
             for(int j=0;j<3;j++){
@@ -362,7 +362,7 @@ int main() {
     // weights matrix (2048 weights x 6x6xfeat5 input neurons)
     vector<vector<vector<vector<float>>>> weight6(2048, vector<vector<vector<float>>>(feat5, vector<vector<float>>(6, vector<float>(6))));
 
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int f=0;f<2048;f++){
         for(int i=0;i<feat5;i++){
             for(int j=0;j<6;j++){
@@ -399,10 +399,10 @@ int main() {
     // layer 7 fully-connected
     vector<float> layer7(2048);
 
-    // weights matrix (2048 weights x 6x6xfeat5 input neurons)
+    // weights matrix (2048 weights x 2048 input neurons)
     vector<float> weight7(2048);
 
-    // random values between -2 and 2 for each kernel
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     for(int i=0;i<2048;i++){
                     
         weight7[i]=distr(gen);
@@ -417,6 +417,34 @@ int main() {
         }
         //layer7[i]+=1;
         //layer7[i] = max((float)0, layer7[i]);   // ReLU function
+    }
+
+
+
+
+    // LAYER 8
+
+    // layer 8 fully-connected
+    vector<float> layer8(1000);
+
+    // weights matrix (1000 weights x 2048 input neurons)
+    vector<float> weight8(1000);
+
+    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
+    for(int i=0;i<1000;i++){
+                    
+        weight8[i]=distr(gen);
+    }
+
+    // from layers 7 to layer 8
+    for(int i=0;i<1000;i++){
+
+        for(int j=0;j<2048;j++){
+
+            //layer8[i] = weight8[j]*layer7[j];
+        }
+        //layer8[i]+=1;
+        //layer8[i] = max((float)0, layer8[i]);   // ReLU function
     }
 
     cout<<"end"<<endl;
