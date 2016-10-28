@@ -36,6 +36,10 @@ public class layerTrainer{
 
       using namespace std;
 
+      /*
+      * upsamples the values to backpropagate to the previous layer, needed only for the pooling layers
+      *
+      */
       vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
           int height1 = backPropagatedError.size();
           int width1 = backPropagatedError[0].size();
@@ -60,6 +64,10 @@ public class layerTrainer{
           return upsampleValuesMatrix;
     }
 
+    /*
+    * batch gradient descent implementation, calculates the gradients for a layer and updates the weight and biases in the matrices
+    *
+    */
     void layerUpdater(){
         vector<vector<double>> deltaW(height, vector<double>(width));
         vector<vector<double>> deltaB(height, vector<double>(width));
@@ -81,6 +89,10 @@ public class layerTrainer{
         }
     }
 
+    /*
+    * backPropagation algorithm implementation, calculates the matrix of values needed for gradient computation
+    *
+    */
     vector<vector<double>> backPropagation(){
         vector<vector<double>> deltaErrors;
         for(int i =0;i<height;i++{
@@ -91,6 +103,10 @@ public class layerTrainer{
         return deltaErrors;
     }
 
+    /*
+    * Apply the activation function (max) to the features' outuput (index1,index2)
+    *
+    */
     double activation(int index1, int index2){
         double max=0;
         for(int i=0;i<forwardValues.size();i++){
@@ -99,7 +115,9 @@ public class layerTrainer{
         return max;
     }
     
-
+    /*
+    * Test
+    */
     int main(){
         vector<vector<int>> m1{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
         vector<vector<int>> m2{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
