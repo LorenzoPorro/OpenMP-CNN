@@ -8,19 +8,30 @@ public class layerTrainer{
       int width = 0;
       vector<vector<double>> layerWeights;
       vector<vector<double>> layerBiases;
+      vecto<vector<vector<double>>> forwardValues;
+      vector<vector<double>> backwardValues;
+      vector<vector<int>> identity;
       double learningRate;
       double weightDecay;
       int batchSize;
 
     public:
-      layerTrainer(vector<vector<double>> layerWeights, vector<vector<double>> layerBiases, double learningRate, double weightDecay, int batchSize){
+      layerTrainer(vector<vector<double>> layerWeights, vector<vector<double>> layerBiases, double learningRate, double weightDecay, int batchSize, vector<vector<vector<double>>> forwardValues,vector<vector<double>> backwardValues){
           this.learningRate = learningRate;
           this.weightDecay = weightDecay;
           this.batchSize = batchSize;
           this.layerBiases =layerBiases;
           this.layerWeights = layerWeights;
+          this.forwardValues = forwardValues;
+          this.backwardValues = backwardValues;
           this.height = layerWeights.size();
           this.width = layerWeights[0].size();
+          for(int i=0;i<forwardValues.size();i++){
+              for(int j=0;j<forwardValues[0].size();j++){
+                  if(i==j)  identity[i][j]=1;
+                  else  identity[i][j]=0;
+              }
+          }
       }
 
       using namespace std;
@@ -70,8 +81,22 @@ public class layerTrainer{
         }
     }
 
-    double backPropagation(){
-        
+    vector<vector<double>> backPropagation(){
+        vector<vector<double>> deltaErrors;
+        for(int i =0;i<height;i++{
+            for(int j=0;j<width;j++){
+               deltaErrors[i][j]=layerWeights[j][i]*backwardValues[i][j]*activation(i,j)*(identity[i][j]-activation(i,j));   
+            }
+        }
+        return deltaErrors;
+    }
+
+    double activation(int index1, int index2){
+        double max=0;
+        for(int i=0;i<forwardValues.size();i++){
+            if(forwardValues[i][index1][index2]>max)  max=forwardValues[i][index1][index2];
+        }
+        return max;
     }
     
 
