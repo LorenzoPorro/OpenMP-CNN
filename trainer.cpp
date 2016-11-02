@@ -16,7 +16,7 @@ public class layerTrainer{
       int batchSize;
 
     public:
-      layerTrainer(vector<vector<double>> layerWeights, vector<vector<double>> layerBiases, double learningRate, double weightDecay, int batchSize, vector<vector<vector<double>>> forwardValues,vector<vector<double>> backwardValues){
+      Trainer::Trainer(vector<vector<double>> layerWeights, vector<vector<double>> layerBiases, double learningRate, double weightDecay, int batchSize, vector<vector<vector<double>>> forwardValues,vector<vector<double>> backwardValues){
           this.learningRate = learningRate;
           this.weightDecay = weightDecay;
           this.batchSize = batchSize;
@@ -40,7 +40,7 @@ public class layerTrainer{
       * upsamples the values to backpropagate to the previous layer, needed only for the pooling layers
       *
       */
-      vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
+      Trainer::vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
           int height1 = backPropagatedError.size();
           int width1 = backPropagatedError[0].size();
           int height2 = derivativeOfAggregation.size();
@@ -68,7 +68,7 @@ public class layerTrainer{
     * batch gradient descent implementation, calculates the gradients for a layer and updates the weight and biases in the matrices
     *
     */
-    void layerUpdater(){
+    void Trainer::layerUpdater(){
         vector<vector<double>> deltaW(height, vector<double>(width));
         vector<vector<double>> deltaB(height, vector<double>(width));
         for(int b=0;b<batchSize;b++){
