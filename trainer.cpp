@@ -1,37 +1,23 @@
 #include <vector>
 #include <iostream>
+#include <map>
 
-public class layerTrainer{
+using namespace std;
+
+class layerTrainer{
 
     private:
       int height = 0;
       int width = 0;
-      vector<vector<double>> layerWeights;
-      vector<vector<double>> layerBiases;
-      vecto<vector<vector<double>>> forwardValues;
-      vector<vector<double>> backwardValues;
-      vector<vector<int>> identity;
       double learningRate;
       double weightDecay;
       int batchSize;
 
     public:
-      Trainer::Trainer(vector<vector<double>> layerWeights, vector<vector<double>> layerBiases, double learningRate, double weightDecay, int batchSize, vector<vector<vector<double>>> forwardValues,vector<vector<double>> backwardValues){
-          this.learningRate = learningRate;
-          this.weightDecay = weightDecay;
-          this.batchSize = batchSize;
-          this.layerBiases =layerBiases;
-          this.layerWeights = layerWeights;
-          this.forwardValues = forwardValues;
-          this.backwardValues = backwardValues;
-          this.height = layerWeights.size();
-          this.width = layerWeights[0].size();
-          for(int i=0;i<forwardValues.size();i++){
-              for(int j=0;j<forwardValues[0].size();j++){
-                  if(i==j)  identity[i][j]=1;
-                  else  identity[i][j]=0;
-              }
-          }
+      Trainer::Trainer(double learningRate, double weightDecay, int batchSize){
+          learningRate <- learningRate;
+          weightDecay <- weightDecay;
+          batchSize <- batchSize;
       }
 
       using namespace std;
@@ -40,7 +26,7 @@ public class layerTrainer{
       * upsamples the values to backpropagate to the previous layer, needed only for the pooling layers
       *
       */
-      Trainer::vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
+      vector<vector<int>> Trainer::upsample(vector<vector<int>> &backPropagatedError, vector<vector<int>> &derivativeOfAggregation){
           int height1 = backPropagatedError.size();
           int width1 = backPropagatedError[0].size();
           int height2 = derivativeOfAggregation.size();
@@ -68,14 +54,15 @@ public class layerTrainer{
     * batch gradient descent implementation, calculates the gradients for a layer and updates the weight and biases in the matrices
     *
     */
-    void Trainer::layerUpdater(){
+     map<char, vector<vector<double>>> Trainer::layerUpdater(vecto<vector<vector<double>>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> &layerWeights, vector<vector<double>> &layerBiases){
         vector<vector<double>> deltaW(height, vector<double>(width));
         vector<vector<double>> deltaB(height, vector<double>(width));
+        map<char, vector<vector<double>>> paramMap;
         for(int b=0;b<batchSize;b++){
             for (int i = 0; i < height; i++){
                 for (int j = 0; j < width; j++){
-                    deltaW[i][j] += backPropagation();
-                    deltaB[i][j] += backPropagation();
+                    deltaW[i][j] += backPropagation(forwardValues, backwardValues, layerWeights);
+                    deltaB[i][j] += backPropagation(forwardValues, backwardValues, layerWeights);
                 }
             }
         }
@@ -87,17 +74,27 @@ public class layerTrainer{
                 }
             }
         }
+        paramMap['W']=layerWeights;
+        paramMap['B']=layerBiases;
+        return paramMap;
     }
 
     /*
     * backPropagation algorithm implementation, calculates the matrix of values needed for gradient computation
     *
     */
-    vector<vector<double>> backPropagation(){
+    vector<vector<double>> backPropagation(vecto<vector<vector<double>>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> &layerWeights){
         vector<vector<double>> deltaErrors;
-        for(int i =0;i<height;i++{
+        vector<vector<int>> identity(forwardValues.size(), vector<double>(forwardValues[0].size()));
+        for(int i=0;i<forwardValues.size();i++){
+              for(int j=0;j<forwardValues[0].size();j++){
+                  if(i==j)  identity[i][j]=1;
+                  else  identity[i][j]=0;
+              }
+        }
+        for(int i =0;i<height;i++){
             for(int j=0;j<width;j++){
-               deltaErrors[i][j]=layerWeights[j][i]*backwardValues[i][j]*activation(i,j)*(identity[i][j]-activation(i,j));   
+               deltaErrors[i][j]=layerWeights[j][i]*backwardValues[i][j]*activation(i,j, forwardValues)*(identity[i][j]-activation(i,j, forwardValues));   
             }
         }
         return deltaErrors;
@@ -107,7 +104,7 @@ public class layerTrainer{
     * Apply the activation function (max) to the features' outuput (index1,index2)
     *
     */
-    double activation(int index1, int index2){
+    double activation(int index1, int index2, vector<vector<vector<double>>> forwardValues){
         double max=0;
         for(int i=0;i<forwardValues.size();i++){
             if(forwardValues[i][index1][index2]>max)  max=forwardValues[i][index1][index2];
@@ -119,6 +116,8 @@ public class layerTrainer{
     * Test
     */
     int main(){
+        Trainer train(0.01,0.0005,128);
+        /*
         vector<vector<int>> m1{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
         vector<vector<int>> m2{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
         int i, j;
@@ -137,5 +136,5 @@ public class layerTrainer{
                 }
             }
         }
-    }
+    }*/
 }
