@@ -2,11 +2,12 @@
 #include <iostream>
 #include <map>
 #include <cmath>
+#include <algorithm>
 
 
-double learningRate=0.001;
+double learningRate=0.01;
 double weightDecay=0.005;
-int batchSize=128;
+double batchSize=128;
 
 using namespace std;
 
@@ -46,7 +47,7 @@ vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<ve
 /*
     * Apply the activation function (max) to the features' outuput (index1,index2)
     *
-    */
+    *
 double activation(int index1, int index2, vector<vector<vector<double>>> forwardValues)
 {
     double max = 0;
@@ -56,13 +57,13 @@ double activation(int index1, int index2, vector<vector<vector<double>>> forward
             max = forwardValues[i][index1][index2];
     }
     return max;
-}
+}*/
 
 /*
     * backPropagation algorithm implementation, calculates the matrix of values needed for gradient computation
     *
     */
-vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> &layerWeights)
+vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> params)
 {
     vector<vector<double>> deltaErrors(backwardValues.size(), vector<double>(backwardValues[0].size()));
     vector<vector<int>> identity(forwardValues.size(), vector<int>(forwardValues[0].size()));
@@ -76,13 +77,13 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
                 identity[i][j] = 0;
         }
     }
-    cout << "Identity init" << endl;
+    //cout << "Identity init" << endl;
     for (int i = 0; i < backwardValues.size(); i++)
     {
         for (int j = 0; j < backwardValues[0].size(); j++)
         {
-            deltaErrors[i][j] = layerWeights[j][i] * backwardValues[i][j] * max((double)0, forwardValues[i][j]) * (identity[i][j] - max((double)0, forwardValues[i][j]));
-            cout << "Error (" << i << ", " << j << ") calculated" << endl;
+            deltaErrors[i][j] = params[j][i] * backwardValues[i][j] * max((double)0, forwardValues[i][j]) * (identity[i][j] - max((double)0, forwardValues[i][j]));
+            //cout << "Error (" << i << ", " << j << ") calculated" << endl;
         }
     }
     return deltaErrors;
@@ -99,30 +100,26 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
     vector<vector<double>> deltaW(backwardValues.size(), vector<double>(backwardValues[0].size()));
     vector<vector<double>> deltaB(backwardValues.size(), vector<double>(backwardValues[0].size()));
     map<char, vector<vector<double>>> paramMap;
-    for (int b = 0; b < batchSize; b++)
-    {
-        cout << "Calculating error for sample " << b << "/128" << endl;
-        for (int i = 0; i < backwardValues.size(); i++)
-        {
-            for (int j = 0; j < backwardValues[0].size(); j++)
-            {
+    //for (int b = 0; b < batchSize; b++){
+        //cout << "Calculating error for sample " << b+1 << "/128" << endl;
+        for (int i = 0; i < backwardValues.size(); i++){
+            for (int j = 0; j < backwardValues[0].size(); j++){
                 deltaW[i][j] += backPropagation(forwardValues, backwardValues, layerWeights)[i][j];
                 deltaB[i][j] += backPropagation(forwardValues, backwardValues, layerBiases)[i][j];
+                //cout << "DeltaW(" << i << ", " << j << "): " << deltaW[i][j] << endl;
+                //cout << "DeltaB(" << i << ", " << j << "): " << deltaB[i][j] << endl;
             }
         }
-    }
-    for (int b = 0; b < batchSize; b++)
-    {
-        cout << "Updating parameters for sample " << b << "/128" << endl;
-        for (int i = 0; i < backwardValues.size(); i++)
-        {
-            for (int j = 0; j < backwardValues[0].size(); j++)
-            {
+    //}
+    //for (int b = 0; b < batchSize; b++){
+        //cout << "Updating parameters for sample " << b+1 << "/128" << endl;
+        for (int i = 0; i < backwardValues.size(); i++){
+            for (int j = 0; j < backwardValues[0].size(); j++){
                 layerWeights[i][j] = layerWeights[i][j] - (learningRate * (((1 / batchSize) * deltaW[i][j]) + weightDecay * layerWeights[i][j]));
                 layerBiases[i][j] = layerBiases[i][j] - (learningRate * ((1 / batchSize) * deltaB[i][j]));
             }
         }
-    }
+    //}
     paramMap['W'] = layerWeights;
     paramMap['B'] = layerBiases;
     cout << "Update finished" << endl;
@@ -135,6 +132,7 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
     * Test
     */
 int main(){
+    //  NB: IL FOR DEL batchSize DEVE ESSERE FUORI DA backPropagation() IL CHIAMANTE PASSA LE MATRICI DI VALORI E CHIAMA backPropagation() 128 VOLTE CON I DATI GIUSTI
     /*
     vector<vector<vector<double>>> forward{{{1, 2, 3}, {1.3, 1.6, 6.4}, {3.1, 4, 2}},
                                            {{1.3, 1.6, 6.4}, {2.3, 3, 1}, {1, 8.34, 3.456}},
