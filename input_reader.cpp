@@ -7,7 +7,6 @@
 #include <map>
 #include <regex>
 
-
 using namespace std;
 
 /*
@@ -98,7 +97,9 @@ map<char, vector < vector < int > >> getColors(string filename){
 
 vector<map<char,vector<vector<int>>>> getInputArray(){
 	vector<map<char,vector<vector<int>>>> array;
-	string filename="file_list.txt";
+	boost::filesystem::path cwdir(boost::filesystem::current_path());
+	//boost::filesystem::path fileLoc=cwdir+="/RGB/file_list.txt"
+	string filename=cwdir.string()+"/RGB/file_list.txt";
 	ifstream infile(filename);
 	string line;
 	int i=0;
