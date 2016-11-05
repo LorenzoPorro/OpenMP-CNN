@@ -49,7 +49,7 @@ vector<int> split(string s, char c){
 		}
 		case 'B':
 		{
-			regex rx ("([0-9]+)(\\()");
+			regex rx ("([0-9]+)(\\))");
 			string str;
 			regex_iterator<string::iterator> rit(s.begin(),s.end(), rx);
 			regex_iterator<string::iterator> rend;
@@ -110,9 +110,9 @@ vector<map<char,vector<vector<int>>>> getInputArray(){
 		cout << "Element" << line <<  "done (" << i << ")" << endl;	
 	}
 }
-
+/*
 int main(){
 	cout << getInputArray().size() << endl;
 }
-
+*/
 
