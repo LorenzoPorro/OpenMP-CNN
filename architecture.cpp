@@ -444,7 +444,7 @@ int main() {
                     }
                 }
 
-
+                
                 // convolution between layer 4 and kernels of layer 5
                 convolution(layer4,kernel5,layer5,stride5,1);
                 
@@ -569,7 +569,7 @@ int main() {
                     }
                 }
 
-
+                
                 // convolution between layer 4 and kernels of layer 5
                 convolution(layer4,kernel5,layer5,stride5,1);
                 
@@ -895,7 +895,7 @@ int main() {
     // LAYER 8
 
     //number of class labels
-    const int lab=1000;
+    const int lab=2;
 
     //take output of layers 6 from both CNNs
     vector<double> layer71=out67[0];
@@ -912,7 +912,7 @@ int main() {
     #pragma omp parallel num_threads(4)
     {
         #pragma omp for collapse(2)
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<lab;i++){
 
             for(int j=0;j<2048;j++){
 
@@ -926,7 +926,7 @@ int main() {
     #pragma omp parallel num_threads(4)
     {
         #pragma omp for
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<lab;i++){
             for(int j=0;j<2048;j++){
 
                 layer8[i] = weight81[i][j]*layer71[j];
@@ -938,7 +938,7 @@ int main() {
         #pragma omp barrier
         
         #pragma omp for
-        for(int i=0;i<1000;i++){
+        for(int i=0;i<lab;i++){
             for(int j=0;j<2048;j++){
 
                 layer8[i] = weight82[i][j]*layer72[j];
@@ -949,8 +949,8 @@ int main() {
     }
 
     //softmax
-    double sum;
-    #pragma omp parallel num_threads(2)
+    double sum=0;
+    #pragma omp parallel num_threads(4)
     {
         #pragma omp for
         for(int i=0;i<lab;i++){
