@@ -26,6 +26,9 @@ vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<ve
     int width2 = derivativeOfAggregation[0].size();
     int row, column;
     vector<vector<int>> upsampleValuesMatrix(height1 * height2, vector<int>(width1 * width2));
+    #pragma omp parallel num_threads(4)
+    {
+    #pragma omp for collapse(4)
     for (int i = 0; i < height1; i++)
     {
         for (int j = 0; j < width1; j++)
@@ -43,6 +46,7 @@ vector<vector<int>> upsample(vector<vector<int>> &backPropagatedError, vector<ve
             }
             //cout << backPropagatedError[i][j] << endl;
         }
+    }
     }
     return upsampleValuesMatrix;
 }
@@ -71,6 +75,10 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
     int count=0;
     vector<vector<double>> deltaErrors(backwardValues.size(), vector<double>(backwardValues[0].size()));
     vector<vector<int>> identity(forwardValues.size(), vector<int>(forwardValues[0].size()));
+    clock_t begin;
+    #pragma omp parallel num_threads(4)
+    {
+    #pragma omp for collapse(2)
     for (int i = 0; i < forwardValues.size(); i++)
     {
         for (int j = 0; j < forwardValues[0].size(); j++)
@@ -82,7 +90,8 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
         }
     }
     //cout << "Identity init" << endl;
-    clock_t begin = clock();
+    begin = clock();
+    #pragma omp for collapse(2)
     for (int i = 0; i < backwardValues.size(); i++)
     {
         for (int j = 0; j < backwardValues[0].size(); j++)
@@ -91,6 +100,7 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
             deltaErrors[i][j] = params[j][i] * backwardValues[i][j] * max((double)0, forwardValues[i][j]) * (identity[i][j] - max((double)0, forwardValues[i][j]));
             cout << '\r' << "Error " << setw(5) << count << " calculated"<< flush;
         }
+    }
     }
     cout << endl <<"Time elapsed: " << double(clock() - begin)/CLOCKS_PER_SEC << endl;
     cout << endl;
@@ -117,6 +127,9 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
         temp1=backPropagation(forwardValues, backwardValues, layerWeights);
         cout << "Biases: " << endl;
         temp2=backPropagation(forwardValues, backwardValues, layerWeights);
+        #pragma omp parallel num_threads(4)
+        {
+        #pragma omp for collapse(2)
         for (int i = 0; i < backwardValues.size(); i++){
             for (int j = 0; j < backwardValues[0].size(); j++){
                 deltaW[i][j] += temp1[i][j];
@@ -128,12 +141,14 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
     }
     //for (int b = 0; b < batchSize; b++){
         //cout << "Updating parameters for sample " << b+1 << "/128" << endl;
+        #pragma omp for collapse(2)
         for (int i = 0; i < backwardValues.size(); i++){
             for (int j = 0; j < backwardValues[0].size(); j++){
                 layerWeights[i][j] = layerWeights[i][j] - (learningRate * (((1 / batchSize) * deltaW[i][j]) + weightDecay * layerWeights[i][j]));
                 layerBiases[i][j] = layerBiases[i][j] - (learningRate * ((1 / batchSize) * deltaB[i][j]));
             }
         }
+    }
     //}
     paramMap['W'] = layerWeights;
     paramMap['B'] = layerBiases;
@@ -148,7 +163,6 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
     * Test
     */
 int main(){
-    //  NB: IL FOR DEL batchSize DEVE ESSERE FUORI DA backPropagation() IL CHIAMANTE PASSA LE MATRICI DI VALORI E CHIAMA backPropagation() 128 VOLTE CON I DATI GIUSTI
     /*
     vector<vector<vector<double>>> forward{{{1, 2, 3}, {1.3, 1.6, 6.4}, {3.1, 4, 2}},
                                            {{1.3, 1.6, 6.4}, {2.3, 3, 1}, {1, 8.34, 3.456}},

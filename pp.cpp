@@ -5,8 +5,9 @@
 #include <cmath>
 #include <random>
 #include <vector>
-#include <D:\Repos\OpenMP-CNN\input_reader.hpp>
+#include </home/lorenzo/OpenMP-CNN/input_reader.cpp>
 #include <algorithm>
+#include <map>
 
 #include <time.h>
 
@@ -134,7 +135,7 @@ int main() {
 
     // input image sample (224x224x3)
     vector<vector<vector<double>>> input(3, vector<vector<double>>(224, vector<double>(224)));
-    
+    /*
     // random bit values for each image layer
     for(int i=0;i<3;i++){
         for(int j=0;j<224;j++){
@@ -143,9 +144,12 @@ int main() {
                 input[i][j][k]=rand()%255;
             }
         }
-    }
-
-
+    }*/
+    
+   map<char, vector<vector<double>>> m=getColors("n01503061_3.txt");
+    input[0]=m['R'];
+    input[1]=m['G'];
+    input[2]=m['B'];
 
     const clock_t begin_time = clock();
 
@@ -970,5 +974,5 @@ int main() {
     }
     
     cout << layer8[0] << ", " << layer8[1] << endl;
-    cout << double(clock() - begin_time)/CLOCKS_PER_SEC;
+    cout << double(clock() - begin_time)/CLOCKS_PER_SEC<< endl;
 }

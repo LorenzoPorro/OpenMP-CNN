@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 #include <regex>
-#include <D:\Repos\OpenMP-CNN\input_reader.hpp>
+
 
 using namespace std;
 
@@ -14,11 +14,31 @@ using namespace std;
 *Reads the pixel values .txt file and returns an array of color values for the specific line.
 *
 *@param s: is the line to read from the file
-*@param c: is the desired value (range: R, G, B)
 */
-vector<int> split(string s, char c){
-	vector<int> values(224);
+map<char,vector<double>> split(string s){
+	vector<double> red(224);
+	vector<double> green(224);
+	vector<double> blue(224);
+	map<char,vector<double>> values;
+	s.erase(remove(s.begin(),s.end(),' '),s.end());
 	int i=0;
+	int j=0;
+	string word;
+	stringstream stream(s);
+	while(getline(stream,word, ')')){
+		word.erase(remove(word.begin(),word.end(),'('),word.end());
+		string word2;
+		stringstream stream2(word);
+		i++;
+		j=0;
+		while(getline(stream2,word2,',')){
+			if(j==0)	red[i]=stod(word2);
+			if(j==1)	green[i]=stod(word2);
+			if(j==2)	blue[i]=stod(word2);
+			j++;	
+		}
+	}
+/*
 	switch(c){
 		case 'R':
 		{
@@ -64,7 +84,16 @@ vector<int> split(string s, char c){
 		}
 		default:
 			break;
+	}*/
+	values['R']=red;
+	values['G']=green;
+	values['B']=blue;
+/*
+	for(int k=0; k<224;k++){
+		cout << values['R'][k] << " "<< values['G'][k] << " " << values['B'][k] << endl;
 	}
+	cout << "LINE OVER" << endl;
+*/
 	return values;
 }
 
@@ -72,22 +101,24 @@ vector<int> split(string s, char c){
 *Returns a map (R,G,B) with the matrices of pixel color values
 *
 */
-map<char, vector < vector < int > >> getColors(string filename){
+map<char, vector < vector < double > >> getColors(string filename){
 	ifstream infile(filename);
 	string line;
 	const int width=224;
 	const int height=224;
-	map <char, vector < vector < int > > > colorMap;
-	vector< vector < int > > redMatrix(height, vector<int>(width));
-	vector< vector < int > > greenMatrix(height, vector<int>(width));
-	vector< vector < int > > blueMatrix(height, vector<int>(width));
+	map <char,vector<double>> lineVal;
+	map <char, vector < vector < double > > > colorMap;
+	vector< vector < double > > redMatrix(height, vector<double>(width));
+	vector< vector < double > > greenMatrix(height, vector<double>(width));
+	vector< vector < double > > blueMatrix(height, vector<double>(width));
 	int position=1;
 	int row=0;
 	while(getline(infile,line)){
-		cout << "line "<< row << endl;
-		redMatrix[row]=split(line,'R');
-		greenMatrix[row]=split(line,'G');
-		blueMatrix[row]=split(line,'B');
+		//cout << "line "<< row << endl;
+		lineVal=split(line);
+		redMatrix[row]=lineVal['R'];
+		greenMatrix[row]=lineVal['G'];
+		blueMatrix[row]=lineVal['B'];
 		row++; 	
 	}
 	colorMap['R']=redMatrix;
@@ -96,11 +127,9 @@ map<char, vector < vector < int > >> getColors(string filename){
 	return colorMap;
 }
 
-vector<map<char,vector<vector<int>>>> getInputArray(){
-	vector<map<char,vector<vector<int>>>> array;
-	boost::filesystem::path cwdir(boost::filesystem::current_path());
-	//boost::filesystem::path fileLoc=cwdir+="/RGB/file_list.txt"
-	string filename=cwdir.string()+"/RGB/file_list.txt";
+vector<map<char,vector<vector<double>>>> getInputArray(){
+	vector<map<char,vector<vector<double>>>> array;
+	string filename="file_list.txt";
 	ifstream infile(filename);
 	string line;
 	int i=0;
@@ -108,7 +137,7 @@ vector<map<char,vector<vector<int>>>> getInputArray(){
 		cout << line << endl;
 		array.push_back(getColors(line));
 		i++;
-		cout << "Element" << line <<  "done (" << i << ")" << endl;	
+		cout << "Element " << line <<  " done (" << i << ")" << endl;	
 	}
 }
 /*
@@ -116,4 +145,3 @@ int main(){
 	cout << getInputArray().size() << endl;
 }
 */
-
