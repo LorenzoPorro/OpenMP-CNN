@@ -3,6 +3,9 @@
 #include <map>
 #include <cmath>
 #include <algorithm>
+#include <random>
+#include <iomanip>
+#include <time.h>
 
 
 double learningRate=0.01;
@@ -61,10 +64,11 @@ double activation(int index1, int index2, vector<vector<vector<double>>> forward
 
 /*
     * backPropagation algorithm implementation, calculates the matrix of values needed for gradient computation
-    *
+    * @params are the parameters to modify (wieghts or biases)
     */
 vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> params)
 {
+    int count=0;
     vector<vector<double>> deltaErrors(backwardValues.size(), vector<double>(backwardValues[0].size()));
     vector<vector<int>> identity(forwardValues.size(), vector<int>(forwardValues[0].size()));
     for (int i = 0; i < forwardValues.size(); i++)
@@ -78,14 +82,18 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
         }
     }
     //cout << "Identity init" << endl;
+    clock_t begin = clock();
     for (int i = 0; i < backwardValues.size(); i++)
     {
         for (int j = 0; j < backwardValues[0].size(); j++)
         {
+            count++;
             deltaErrors[i][j] = params[j][i] * backwardValues[i][j] * max((double)0, forwardValues[i][j]) * (identity[i][j] - max((double)0, forwardValues[i][j]));
-            //cout << "Error (" << i << ", " << j << ") calculated" << endl;
+            cout << '\r' << "Error " << setw(5) << count << " calculated"<< flush;
         }
     }
+    cout << endl <<"Time elapsed: " << double(clock() - begin)/CLOCKS_PER_SEC << endl;
+    cout << endl;
     return deltaErrors;
 }
 
@@ -94,23 +102,30 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
     * batch gradient descent implementation, calculates the gradients for a layer and updates the weight and biases in the matrices
     *
     */
-map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> &layerWeights, vector<vector<double>> &layerBiases)
+map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardValues, vector<vector<double>> backwardValues, vector<vector<double>> layerWeights, vector<vector<double>> layerBiases)
 {
     cout << "Update started" << endl;
     vector<vector<double>> deltaW(backwardValues.size(), vector<double>(backwardValues[0].size()));
     vector<vector<double>> deltaB(backwardValues.size(), vector<double>(backwardValues[0].size()));
+    vector<vector<double>> temp1;
+    vector<vector<double>> temp2;
     map<char, vector<vector<double>>> paramMap;
-    //for (int b = 0; b < batchSize; b++){
-        //cout << "Calculating error for sample " << b+1 << "/128" << endl;
+    clock_t begin=clock();
+    for (int b = 0; b < batchSize; b++){
+        cout << "Calculating error for sample " << b+1 << "/128" << endl;
+        cout << "Weights: " << endl;
+        temp1=backPropagation(forwardValues, backwardValues, layerWeights);
+        cout << "Biases: " << endl;
+        temp2=backPropagation(forwardValues, backwardValues, layerWeights);
         for (int i = 0; i < backwardValues.size(); i++){
             for (int j = 0; j < backwardValues[0].size(); j++){
-                deltaW[i][j] += backPropagation(forwardValues, backwardValues, layerWeights)[i][j];
-                deltaB[i][j] += backPropagation(forwardValues, backwardValues, layerBiases)[i][j];
+                deltaW[i][j] += temp1[i][j];
+                deltaB[i][j] += temp2[i][j];
                 //cout << "DeltaW(" << i << ", " << j << "): " << deltaW[i][j] << endl;
                 //cout << "DeltaB(" << i << ", " << j << "): " << deltaB[i][j] << endl;
             }
         }
-    //}
+    }
     //for (int b = 0; b < batchSize; b++){
         //cout << "Updating parameters for sample " << b+1 << "/128" << endl;
         for (int i = 0; i < backwardValues.size(); i++){
@@ -123,6 +138,7 @@ map<char, vector<vector<double>>> layerUpdater(vector<vector<double>> forwardVal
     paramMap['W'] = layerWeights;
     paramMap['B'] = layerBiases;
     cout << "Update finished" << endl;
+    cout << "Total time elapsed: " << double(clock() - begin)/CLOCKS_PER_SEC << endl;
     return paramMap;
 }
 
@@ -138,20 +154,58 @@ int main(){
                                            {{1.3, 1.6, 6.4}, {2.3, 3, 1}, {1, 8.34, 3.456}},
                                            {{1, 6, 2.5}, {3.76, 3, 9.765}, {3, 8, 2.234}}};
     */
-    vector<vector<double>> forwardValues{{1, 6, 2.5}, {3.76, 3, 9.765}, {3, 8, 2.234}};            
-    vector<vector<double>> backwardValues{{1, 2.65, 7}, {1.3456, 5, 9}, {0, 1.321, 9}};
-    vector<vector<double>> layerWeights{{1, 2, 0}, {4, 5.987, 1}, {7, 8, 0.345}};
-    vector<vector<double>> layerBiases{{8, 2, 3}, {4.396, 3, 3}, {1, 1.921, 1}};
+
+    default_random_engine gen;
+    normal_distribution<double> distr(0, 100);
+
+    vector<vector<double>> forwardValues(55, vector<double>(55));            
+    vector<vector<double>> backwardValues(55, vector<double>(55));
+    vector<vector<double>> layerWeights(55, vector<double>(55));
+    vector<vector<double>> layerBiases(55, vector<double>(55));
+
+    for(int i=0;i<55;i++){
+        for(int j=0;j<55;j++){
+            forwardValues[i][j]=distr(gen);
+            backwardValues[i][j]=distr(gen);
+            layerWeights[i][j]=distr(gen);
+            layerBiases[i][j]=distr(gen);
+        }
+    }
     
+    int count=0;
+    cout << "weights: " << endl;
+    for(int i=0;i<layerWeights.size();i++){
+        for(int j=0;j<layerWeights[0].size();j++){
+            count++;
+            cout << setw(10) <<layerWeights[i][j] << " ";
+            if(count==layerWeights[0].size()){
+                cout << endl;
+                count=0;
+            } 
+        }
+    }
+
+    cout << "biases: " << endl;
+    for(int i=0;i<layerBiases.size();i++){
+        for(int j=0;j<layerBiases[0].size();j++){
+            count++;
+            cout << setw(10) <<layerBiases[i][j] << " ";
+            if(count==layerBiases[0].size()){
+                cout << endl;
+                count=0;
+            } 
+        }
+    }
+
     map <char, vector<vector<double>>> mp=layerUpdater(forwardValues, backwardValues, layerWeights, layerBiases);
     vector<vector<double>> w=mp['W'];
     vector<vector<double>> b=mp['B'];
-    int count=0;
+    count=0;
     cout << "weights: " << endl;
     for(int i=0;i<w.size();i++){
         for(int j=0;j<w[0].size();j++){
             count++;
-            cout << w[i][j] << " ";
+            cout << setw(10) << w[i][j] << " ";
             if(count==w[0].size()){
                 cout << endl;
                 count=0;
@@ -163,7 +217,7 @@ int main(){
     for(int i=0;i<b.size();i++){
         for(int j=0;j<b[0].size();j++){
             count++;
-            cout << b[i][j] << " ";
+            cout << setw(10) <<b[i][j] << " ";
             if(count==b[0].size()){
                 cout << endl;
                 count=0;

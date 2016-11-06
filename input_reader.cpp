@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <regex>
+#include <D:\Repos\OpenMP-CNN\input_reader.hpp>
 
 using namespace std;
 
