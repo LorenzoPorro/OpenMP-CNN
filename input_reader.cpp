@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <vector>
 #include <map>
-#include <regex>
-
 
 using namespace std;
 
@@ -38,68 +36,16 @@ map<char,vector<double>> split(string s){
 			j++;	
 		}
 	}
-/*
-	switch(c){
-		case 'R':
-		{
-			regex rx ("(\\()([0-9]+)");
-			string str;
-			regex_iterator<string::iterator> rit(s.begin(),s.end(), rx);
-			regex_iterator<string::iterator> rend;
-			while(rit !=rend){
-				str=rit->str();
-				str.erase(remove(str.begin(), str.end(), '('), str.end());
-				values[i]=stoi(str);
-				++rit;
-				i++;
-			}
-		}
-		case 'G':
-		{
-			regex rx ("(\\,\\.)([0-9]+)(\\,)");
-			string str;
-			regex_iterator<string::iterator> rit(s.begin(),s.end(), rx);
-			regex_iterator<string::iterator> rend;
-			while(rit !=rend){
-				str=rit->str();
-				str.erase(remove(str.begin(), str.end(), ','), str.end());
-				values[i]=stoi(str);
-				++rit;
-				i++;
-			}
-		}
-		case 'B':
-		{
-			regex rx ("([0-9]+)(\\))");
-			string str;
-			regex_iterator<string::iterator> rit(s.begin(),s.end(), rx);
-			regex_iterator<string::iterator> rend;
-			while(rit !=rend){
-				str=rit->str();
-				str.erase(remove(str.begin(), str.end(), ')'), str.end());
-				values[i]=stoi(str);
-				++rit;
-				i++;
-			}
-		}
-		default:
-			break;
-	}*/
 	values['R']=red;
 	values['G']=green;
 	values['B']=blue;
-/*
-	for(int k=0; k<224;k++){
-		cout << values['R'][k] << " "<< values['G'][k] << " " << values['B'][k] << endl;
-	}
-	cout << "LINE OVER" << endl;
-*/
 	return values;
 }
 
 /*
 *Returns a map (R,G,B) with the matrices of pixel color values
 *
+*@param filename: is the name of the .txt file to read
 */
 map<char, vector < vector < double > >> getColors(string filename){
 	ifstream infile(filename);
@@ -114,7 +60,6 @@ map<char, vector < vector < double > >> getColors(string filename){
 	int position=1;
 	int row=0;
 	while(getline(infile,line)){
-		//cout << "line "<< row << endl;
 		lineVal=split(line);
 		redMatrix[row]=lineVal['R'];
 		greenMatrix[row]=lineVal['G'];
@@ -127,6 +72,10 @@ map<char, vector < vector < double > >> getColors(string filename){
 	return colorMap;
 }
 
+/*
+*Returns all the RGB matrices of all files contained into the file_list.txt file in a map with key=filename
+*
+*/
 vector<map<char,vector<vector<double>>>> getInputArray(){
 	vector<map<char,vector<vector<double>>>> array;
 	string filename="file_list.txt";
@@ -140,6 +89,9 @@ vector<map<char,vector<vector<double>>>> getInputArray(){
 		cout << "Element " << line <<  " done (" << i << ")" << endl;	
 	}
 }
+
+//Test
+
 /*
 int main(){
 	cout << getInputArray().size() << endl;
