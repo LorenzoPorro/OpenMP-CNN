@@ -6,6 +6,7 @@
 #include <random>
 #include <vector>
 #include </home/lorenzo/OpenMP-CNN/input_reader.cpp>
+#include </home/lorenzo/OpenMP-CNN/trainer.cpp>
 #include <algorithm>
 #include <map>
 
@@ -973,6 +974,8 @@ int main() {
         }
     }
     
+    lastLayerBackValues(layer8.size(), 1, layer8[0], 0.99);
+
     cout << layer8[0] << ", " << layer8[1] << endl;
     cout << double(clock() - begin_time)/CLOCKS_PER_SEC<< endl;
 }
