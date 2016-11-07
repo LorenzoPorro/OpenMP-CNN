@@ -125,15 +125,10 @@ void maxpooling(vector<vector<vector<double>>> input, vector<vector<vector<doubl
 
 int main() {
 
-    // Gaussian distribution with zero-mean and standard deviation 0.01
-    std::default_random_engine gen;
-    std::normal_distribution<double> distr(0,0.01);
-
-
-    // input image sample (224x224x3)
+    //input image sample (224x224x3)
     vector<vector<vector<double>>> input(3, vector<vector<double>>(224, vector<double>(224)));
     
-    // random bit values for each image layer
+    //random bit values for each image layer
     for(int i=0;i<3;i++){
         for(int j=0;j<224;j++){
             for(int k=0;k<224;k++){
@@ -155,8 +150,13 @@ int main() {
     const int feat5=128;    //number of features for layer 5
     const int lab=2;        //number of class labels
 
+
     // KERNELS INITIALIZATION
 
+    //Gaussian distribution with zero-mean and standard deviation 0.01
+    std::default_random_engine gen;
+    std::normal_distribution<double> distr(0,0.01);
+    
     // KERNELS 1
     
     //3 kernels which will convolved on the 3 image matrices (11x11x3xfeat1)
