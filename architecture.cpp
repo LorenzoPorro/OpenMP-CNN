@@ -151,12 +151,13 @@ int main() {
     const int lab=2;        //number of class labels
 
 
+    
     // KERNELS INITIALIZATION
 
     //Gaussian distribution with zero-mean and standard deviation 0.01
     std::default_random_engine gen;
     std::normal_distribution<double> distr(0,0.01);
-    
+
     // KERNELS 1
     
     //3 kernels which will convolved on the 3 image matrices (11x11x3xfeat1)
