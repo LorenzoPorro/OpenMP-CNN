@@ -11,8 +11,14 @@ using namespace std;
 
 
 
-/* convolution function
-   input: input matrix, kernel matrix, output matrix, the stride and the bias */
+/*
+    Convolution function
+    @param input: input matrix on which convolution is executed
+    @param kernel: matrix which convolved on the input
+    @param output: output matrix from the convolution
+    @param stride: stride value for the convolution
+    @param bias: bias value
+*/
 void convolution(vector<vector<vector<double>>> input, vector<vector<vector<vector<double>>>> kernel, vector<vector<vector<double>>> &output, int stride, int bias){
     
     #pragma omp parallel num_threads(4)
@@ -61,8 +67,10 @@ void convolution(vector<vector<vector<double>>> input, vector<vector<vector<vect
 
 
 
-/* ReLU non-linear function: apply the ReLU nonlinear function f(x)=max(0,x) to each input value
-   input: matrix on which applying ReLU function */
+/*
+    ReLU non-linear function: apply the ReLU nonlinear function f(x)=max(0,x) to each input value
+    @param relu: matrix on which ReLU function is applied 
+*/
 void relu(vector<vector<vector<double>>> &relu){
 
     #pragma omp parallel num_threads(4)
@@ -87,8 +95,11 @@ void relu(vector<vector<vector<double>>> &relu){
 
 
 
-/* overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
-   input: input matrix, output matrix, dimension of the overlapping pooling matrix and the stride */
+/*
+    Overlapping max-pooling funtion: extract the maximum value from the output of the convolutional operation
+    @param input: input matrix on which the pooling is executed
+    @param output: matrix in output of the pooling function
+*/
 void maxpooling(vector<vector<vector<double>>> input, vector<vector<vector<double>>> &output){
     
     #pragma omp parallel num_threads(4)
@@ -125,10 +136,12 @@ void maxpooling(vector<vector<vector<double>>> input, vector<vector<vector<doubl
 
 int main() {
 
-    //input image sample (224x224x3)
+    const clock_t begin_time = clock();
+
+    //input image (224x224x3)
     vector<vector<vector<double>>> input(3, vector<vector<double>>(224, vector<double>(224)));
     
-    //random bit values for each image layer
+    //random values between 0 and 255 for each pixel
     for(int i=0;i<3;i++){
         for(int j=0;j<224;j++){
             for(int k=0;k<224;k++){
@@ -139,10 +152,6 @@ int main() {
     }
 
 
-
-    const clock_t begin_time = clock();
-
-
     const int feat1=48;     //number of features for layer 1
     const int feat2=128;    //number of features for layer 2
     const int feat3=192;    //number of features for layer 3
@@ -151,7 +160,7 @@ int main() {
     const int lab=2;        //number of class labels
 
 
-    
+
     // KERNELS INITIALIZATION
 
     //Gaussian distribution with zero-mean and standard deviation 0.01
@@ -160,7 +169,7 @@ int main() {
 
     // KERNELS 1
     
-    //3 kernels which will convolved on the 3 image matrices (11x11x3xfeat1)
+    //kernels for the first layers of the two CNNs (11x11x3xfeat1)
     vector<vector<vector<vector<double>>>> kernel11(feat1, vector<vector<vector<double>>>(3, vector<vector<double>>(11, vector<double>(11))));
     vector<vector<vector<vector<double>>>> kernel12(feat1, vector<vector<vector<double>>>(3, vector<vector<double>>(11, vector<double>(11))));
 
@@ -184,7 +193,7 @@ int main() {
 
     // KERNELS 2
 
-    //kernel (5x5xfeat1xfeat2)
+    //kernels for the second layers of the two CNNs (5x5xfeat1xfeat2)
     vector<vector<vector<vector<double>>>> kernel21(feat2, vector<vector<vector<double>>>(feat1, vector<vector<double>>(5, vector<double>(5))));
     vector<vector<vector<vector<double>>>> kernel22(feat2, vector<vector<vector<double>>>(feat1, vector<vector<double>>(5, vector<double>(5))));
 
@@ -208,7 +217,7 @@ int main() {
 
     // KERNELS 3
 
-    //kernels (3x3xfeat2xfeat3)
+    //kernels for the third layers of the two CNNs (3x3xfeat2xfeat3)
     vector<vector<vector<vector<double>>>> kernel311(feat3, vector<vector<vector<double>>>(feat2, vector<vector<double>>(3, vector<double>(3))));
     vector<vector<vector<vector<double>>>> kernel312(feat3, vector<vector<vector<double>>>(feat2, vector<vector<double>>(3, vector<double>(3))));
     vector<vector<vector<vector<double>>>> kernel321(feat3, vector<vector<vector<double>>>(feat2, vector<vector<double>>(3, vector<double>(3))));
@@ -236,7 +245,7 @@ int main() {
 
     // KERNELS 4
 
-    //kernel (3x3xfeat3xfeat4)
+    //kernels for the fourth layers of the two CNNs (3x3xfeat3xfeat4)
     vector<vector<vector<vector<double>>>> kernel41(feat4, vector<vector<vector<double>>>(feat3, vector<vector<double>>(3, vector<double>(3))));
     vector<vector<vector<vector<double>>>> kernel42(feat4, vector<vector<vector<double>>>(feat3, vector<vector<double>>(3, vector<double>(3))));
 
@@ -260,11 +269,11 @@ int main() {
 
     // KERNELS 5
 
-    // kernel (3x3xfeat3xfeat4)
+    //kernels for the fifth layers of the two CNNs (3x3xfeat3xfeat4)
     vector<vector<vector<vector<double>>>> kernel51(feat5, vector<vector<vector<double>>>(feat4, vector<vector<double>>(3, vector<double>(3))));
     vector<vector<vector<vector<double>>>> kernel52(feat5, vector<vector<vector<double>>>(feat4, vector<vector<double>>(3, vector<double>(3))));
 
-    // initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
+    //initialize weights from a zero-mean Gaussian distribution with standard deviation 0.01
     #pragma omp parallel num_threads(4)
     {
         #pragma omp for collapse(4)
@@ -284,7 +293,7 @@ int main() {
 
     // KERNELS 6
 
-    //weights matrix (2048 weights x 6x6xfeat5 input neurons)
+    //weights matrices of the sixth layers (2048 weights x 6x6xfeat5 input neurons)
     vector<vector<vector<vector<double>>>> weight611(2048, vector<vector<vector<double>>>(feat5, vector<vector<double>>(6, vector<double>(6))));
     vector<vector<vector<vector<double>>>> weight612(2048, vector<vector<vector<double>>>(feat5, vector<vector<double>>(6, vector<double>(6))));
     vector<vector<vector<vector<double>>>> weight621(2048, vector<vector<vector<double>>>(feat5, vector<vector<double>>(6, vector<double>(6))));
@@ -312,7 +321,7 @@ int main() {
 
     // KERNELS 7
 
-    //weights matrix (2048 weights x 2048 input neurons)
+    //weights matrices of the seventh layers (2048 weights x 2048 input neurons)
     vector<vector <double>> weight711(2048, vector<double>(2048));
     vector<vector <double>> weight712(2048, vector<double>(2048));
     vector<vector <double>> weight721(2048, vector<double>(2048));
@@ -335,7 +344,7 @@ int main() {
 
     // KERNEL 8
 
-    //weights matrix (1000 weights x 2048 input neurons)
+    //weights matrices for the last layer (1000 weights x 2048 input neurons)
     vector<vector<double>> weight81(lab, vector<double>(2048));
     vector<vector<double>> weight82(lab, vector<double>(2048));
     
@@ -362,7 +371,10 @@ int main() {
     vector<vector<double>> out67(2,vector<double>(2048));
 
 
-    omp_set_nested(1);
+    //Network parallelization
+    
+    omp_set_nested(1);  //set nested value to 1 to allow nested parallelism
+    
     #pragma omp parallel num_threads(2)
     {
         //layers 1 and 2
@@ -373,16 +385,16 @@ int main() {
             {
                 // LAYER 1
                 
-                //output of convolutional operation between input and kernel of layer 1 (55x55xfeat1)
+                //output of convolutional operation between input image and kernel of layer 1 (55x55xfeat1)
                 vector<vector<vector<double>>> layer1(feat1, vector<vector<double>>(55, vector<double>(55)));
 
 
                 int stride1 = round((double)(input[0].size() - kernel11[0][0].size())/(layer1[0].size()-1));
 
-                //convolution between input image layers and kernels
+                //convolution between input image and layer 1 kernel
                 convolution(input,kernel11,layer1,stride1,0);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(layer1);
 
 
@@ -401,14 +413,14 @@ int main() {
                 //convolution between layer 1 and kernels of layer 2
                 convolution(layer1,kernel21,conv2,stride2,1);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(conv2);
                 
                 //overlapped max-pooling    
                 maxpooling(conv2,layer2);
                 
 
-                //save output of layer 2 for the first CNN
+                //saving output of the first CNN layer 2
                 out2[0]=layer2;
             }
 
@@ -417,16 +429,16 @@ int main() {
             {
                 // LAYER 1
                 
-                //output of convolutional operation between input and kernel of layer 1 (55x55xfeat1)
+                //output of convolutional operation between input image and kernel of layer 1 (55x55xfeat1)
                 vector<vector<vector<double>>> layer1(feat1, vector<vector<double>>(55, vector<double>(55)));
 
 
                 int stride1 = round((double)(input[0].size() - kernel12[0][0].size())/(layer1[0].size()-1));
 
-                //convolution between input image layers and kernels
+                //convolution between input image and layer 1 kernel
                 convolution(input,kernel12,layer1,stride1,0);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(layer1);
 
 
@@ -439,19 +451,20 @@ int main() {
                 //output of overlapped max-pooling operation (27x27xfeat2)
                 vector<vector<vector<double>>> layer2(feat2, vector<vector<double>>(27, vector<double>(27)));
 
+
                 int stride2 = round((double)(layer1[0].size() - kernel22[0][0].size())/(conv2[0].size()-1));
 
-                //convolution between layer 1 and kernels of layer 2
+                //convolution between layer 1 and layer 2 kernel
                 convolution(layer1,kernel22,conv2,stride2,1);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(conv2);
                 
                 //overlapped max-pooling    
                 maxpooling(conv2,layer2);
                 
 
-                //save output of layer 2 for the second CNN
+                //saving output of the second CNN layer 2
                 out2[1]=layer2;
             }
 
@@ -484,7 +497,7 @@ int main() {
                 convolution(layer21,kernel311,conv3,stride3,0);
                 convolution(layer22,kernel312,conv3,stride3,0);
                 
-                // ReLU nonlinearity
+                // ReLU function
                 relu(conv3);
                 
                 //overlapped max-pooling
@@ -500,30 +513,30 @@ int main() {
 
                 int stride4 = round((double)(layer3[0].size() - kernel41[0][0].size())/(layer4[0].size()-1));
 
-                //convolution between layer 3 and kernels of layer 4
+                //convolution between layer 3 and kernel of layer 4
                 convolution(layer3,kernel41,layer4,stride4,1);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(layer4);                
                 
 
 
                 // LAYER 5
 
-                // output of convolutional operation between layer4 and kernel of layer 5 (13x13xfeat5)
+                //output of convolutional operation between layer4 and kernel of layer 5 (13x13xfeat5)
                 vector<vector<vector<double>>> layer5(feat5, vector<vector<double>>(13, vector<double>(13)));
 
 
                 int stride5 = round((double)(layer4[0].size() - kernel51[0][0].size())/(layer5[0].size()-1));
                 
-                // convolution between layer 4 and kernels of layer 5
+                //convolution between layer 4 and kernels of layer 5
                 convolution(layer4,kernel51,layer5,stride5,1);
                 
-                // ReLU nonlinearity
+                //ReLU function
                 relu(layer5);
                 
 
-                //save output of layer 5 for the first CNN
+                //saving output of the first CNN layer 5
                 out5[0]=layer5;
             }
 
@@ -551,7 +564,7 @@ int main() {
                 convolution(layer21,kernel321,conv3,stride3,0);
                 convolution(layer22,kernel322,conv3,stride3,0);
                 
-                // ReLU nonlinearity
+                // ReLU function
                 relu(conv3);
                 
                 //overlapped max-pooling
@@ -570,7 +583,7 @@ int main() {
                 //convolution between layer 3 and kernels of layer 4
                 convolution(layer3,kernel42,layer4,stride4,1);
                 
-                //ReLU nonlinearity
+                //ReLU function
                 relu(layer4);                
                 
 
@@ -583,14 +596,14 @@ int main() {
 
                 int stride5 = round((double)(layer4[0].size() - kernel52[0][0].size())/(layer5[0].size()-1));
                 
-                // convolution between layer 4 and kernels of layer 5
+                // convolution between layer 4 and kernel of layer 5
                 convolution(layer4,kernel52,layer5,stride5,1);
                 
-                // ReLU nonlinearity
+                // ReLU function
                 relu(layer5);
                     
 
-                //save output of layer 5 for the second CNN
+                //saving output of the second CNN layer 5
                 out5[1]=layer5;
             }
         }
@@ -614,16 +627,18 @@ int main() {
                 vector<vector<vector<double>>> pool61(feat5, vector<vector<double>>(6, vector<double>(6)));
                 vector<vector<vector<double>>> pool62(feat5, vector<vector<double>>(6, vector<double>(6)));
 
-                //layer 6 fully-connected
+                //fully-connected layer 6
                 vector<double> layer6(2048);
 
+                //pooling output of layer 5
                 maxpooling(layer51,pool61);
                 maxpooling(layer52,pool62);
                 
 
-                //from layer5 to fully-connected layer6
+                //from layer5 to layer6
                 #pragma omp parallel num_threads(4)
                 {
+                    //hadamard products using output of the first CNN layer 5
                     #pragma omp for
                     for(int i=0;i<2048;i++){
 
@@ -643,6 +658,7 @@ int main() {
                     
                     #pragma omp barrier
 
+                    //hadamard products using output of the second CNN layer 5
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                        
@@ -662,7 +678,7 @@ int main() {
                 }
                 
 
-                //save output of layer 6 for the first CNN
+                //saving output of the first CNN layer 6
                 out67[0]=layer6;
             }
 
@@ -687,9 +703,10 @@ int main() {
                 maxpooling(layer52,pool62);
                 
 
-                //from layer5 to fully-connected layer6
+                //from layer5 to layer6
                 #pragma omp parallel num_threads(4)
                 {
+                    //hadamard products using output of the first CNN layer 5
                     #pragma omp for
                     for(int i=0;i<2048;i++){
 
@@ -709,6 +726,7 @@ int main() {
                     
                     #pragma omp barrier
 
+                    //hadamard products using output of the second CNN layer 5
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                        
@@ -728,7 +746,7 @@ int main() {
                 }
                 
                 
-                //save output of layer 6 for the second CNN
+                //saving output of the second CNN layer 6
                 out67[1]=layer6;
             }
 
@@ -748,12 +766,13 @@ int main() {
                 vector<double> layer62=out67[1];
 
 
-                //layer 7 fully-connected
+                //fully-connected layer 7
                 vector<double> layer7(2048);
 
                 //from layer6 to layer 7
                 #pragma omp parallel num_threads(4)
-                {
+                {   
+                    //hadamard products using output of the first CNN layer 6
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                         for(int j=0;j<2048;j++){
@@ -766,6 +785,7 @@ int main() {
 
                     #pragma omp barrier
 
+                    //hadamard products using output of the second CNN layer 6
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                         for(int j=0;j<2048;j++){
@@ -778,7 +798,7 @@ int main() {
                 }
                 
 
-                //save output of layer 7 for the first CNN
+                //saving output of the first CNN layer 7
                 out67[0]=layer7;
             }
 
@@ -793,12 +813,13 @@ int main() {
                 vector<double> layer62=out67[1];
 
 
-                //layer 7 fully-connected
+                //fully-connected layer 7
                 vector<double> layer7(2048);
 
                 //from layer6 to layer 7
                 #pragma omp parallel num_threads(4)
                 {
+                    //hadamard products using output of the first CNN layer 6
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                         for(int j=0;j<2048;j++){
@@ -811,6 +832,7 @@ int main() {
 
                     #pragma omp barrier
 
+                    //hadamard products using output of the second CNN layer 6
                     #pragma omp for
                     for(int i=0;i<2048;i++){
                         for(int j=0;j<2048;j++){
@@ -823,12 +845,13 @@ int main() {
                 }
                 
 
-                //save output of layer 7 for the second CNN
+                //saving output of the second CNN layer 7
                 out67[1]=layer7;
             }
 
         }
     }
+
 
 
     // LAYER 8
@@ -838,12 +861,13 @@ int main() {
     vector<double> layer72=out67[1];
 
 
-    //layer 8 fully-connected
+    //fully-connected layer 8
     vector<double> layer8(lab);
 
     //from layers 7 to layer 8
     #pragma omp parallel num_threads(4)
     {
+        //hadamard products using output of the first CNN layer 7
         #pragma omp for
         for(int i=0;i<lab;i++){
             for(int j=0;j<2048;j++){
@@ -856,6 +880,7 @@ int main() {
 
         #pragma omp barrier
         
+        //hadamard products using output of the second CNN layer 7
         #pragma omp for
         for(int i=0;i<lab;i++){
             for(int j=0;j<2048;j++){
@@ -867,7 +892,7 @@ int main() {
         }
     }
 
-    //softmax
+    //softmax function
     double sum=0;
     #pragma omp parallel num_threads(4)
     {
@@ -887,8 +912,10 @@ int main() {
         }
     }
     
-    cout<<layer8[0]<<endl;
-    cout<<layer8[1]<<endl;
-    cout<<"Time: " << double(clock() - begin_time)/CLOCKS_PER_SEC;
+
+    //output probabilities and execution time
+    cout << "Probability that the input belongs to the category: " << layer8[0] << endl;
+    cout << "Probability that the input doesn't belong to the category: " << layer8[1] << endl;
+    cout << "Execution time: " << double(clock() - begin_time)/CLOCKS_PER_SEC;
 
 }
