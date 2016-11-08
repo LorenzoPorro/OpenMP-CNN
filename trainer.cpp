@@ -89,6 +89,7 @@ vector<vector<double>> upsample(vector<vector<double>> backPropagatedError, vect
 vector<vector<double>> lastLayerBackValues(int layerHeight, int layerWidth, double desiredOutput, double output){   
     cout << "Calculating back values for last layer..." << endl;
     vector<vector<double>> backValues(2, vector<double>(1));
+    #pragma omp for collapse(2)
     for (int i = 0; i < layerHeight; i++){
         for (int j = 0; j < layerWidth; j++){
             backValues[i][j] = -(desiredOutput - max((double)0, output)) * max((double)0, output) * (1 - max((double)0, output));
@@ -110,6 +111,7 @@ vector<vector<double>> layerBackValues(vector<vector<double>> weights, vector<ve
     vector<vector<double>> errors;
     if (weights.size() != nextLayerErrors.size() || weights[0].size() != nextLayerErrors[0].size()){
         vector<vector<double>> scale(weights.size(), vector<double>(weights[0].size()));
+        #pragma omp for collapse(2)
         for (int i = 0; i < weights.size(); i++){
             for (int j = 0; j < weights[0].size(); j++){
                 scale[i][j] = 1;
@@ -118,6 +120,7 @@ vector<vector<double>> layerBackValues(vector<vector<double>> weights, vector<ve
         errors = upsample(nextLayerErrors, scale);
     }
     else    errors = nextLayerErrors;
+    #pragma omp for collapse(2)
     for (int i = 0; i < weights.size(); i++){
         for (int j = 0; j < weights[0].size(); j++){
             backValues[i][j] = weights[i][j] * errors[i][j] * max((double)0, layerOutput[i][j]) * (1 - max((double)0, layerOutput[i][j]));
@@ -154,7 +157,6 @@ vector<vector<double>> backPropagation(vector<vector<double>> forwardValues, vec
             for (int j = 0; j < backwardValues[0].size(); j++){
                 count++;
                 deltaErrors[i][j] = params[j][i] * backwardValues[i][j] * max((double)0, forwardValues[i][j]) * (identity[i][j] - max((double)0, forwardValues[i][j]));
-                //cout << '\r' << "Error " << setw(5) << count << " calculated" << flush;
             }
         }
     }
