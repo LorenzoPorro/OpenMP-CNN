@@ -139,6 +139,14 @@ int main() {
 
     const clock_t begin_time = clock();
 
+    const int feat1 = 48;     //number of features for layer 1
+    const int feat2 = 128;    //number of features for layer 2
+    const int feat3 = 192;    //number of features for layer 3
+    const int feat4 = 192;    //number of features for layer 4
+    const int feat5 = 128;    //number of features for layer 5
+    const int lab = 2;        //number of class labels
+
+
     //input image (224x224x3)
     vector<vector<vector<double>>> input(3, vector<vector<double>>(224, vector<double>(224)));
     
@@ -151,15 +159,6 @@ int main() {
             }
         }
     }
-
-
-    const int feat1=48;     //number of features for layer 1
-    const int feat2=128;    //number of features for layer 2
-    const int feat3=192;    //number of features for layer 3
-    const int feat4=192;    //number of features for layer 4
-    const int feat5=128;    //number of features for layer 5
-    const int lab=2;        //number of class labels
-
 
 
     // KERNELS INITIALIZATION
@@ -370,6 +369,7 @@ int main() {
     vector<vector<vector<vector<double>>>> out5(2,vector<vector<vector<double>>>(feat5, vector<vector<double>>(13, vector<double>(13))));
     //shared array for saving output of layers 6 and 7
     vector<vector<double>> out67(2,vector<double>(2048));
+
 
 
     //Network parallelization
