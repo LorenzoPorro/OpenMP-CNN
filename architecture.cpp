@@ -6,7 +6,7 @@
 #include <random>
 #include <vector>
 #include <time.h>
-#include <input_reader.cpp>
+//#include <input_reader.cpp>
 
 using namespace std;
 
@@ -134,7 +134,7 @@ void maxpooling(vector<vector<vector<double>>> input, vector<vector<vector<doubl
 }
 
 
-
+//initialization of kernels and network parallelization
 int main() {
 
     const clock_t begin_time = clock();
