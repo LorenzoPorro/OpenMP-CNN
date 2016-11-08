@@ -78,6 +78,7 @@ map<char, vector < vector < double > >> getColors(string filename){
 */
 vector<map<char,vector<vector<double>>>> getInputArray(){
 	vector<map<char,vector<vector<double>>>> array;
+	
 	string filename="file_list.txt";
 	ifstream infile(filename);
 	string line;

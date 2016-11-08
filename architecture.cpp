@@ -6,6 +6,7 @@
 #include <random>
 #include <vector>
 #include <time.h>
+#include <input_reader.cpp>
 
 using namespace std;
 
