@@ -10,9 +10,9 @@ Imagenet Classification with Deep Convolutional Neural Networks
 ################################################################
 
 
-"Synset(x) RGB data": contains all the .txt files containing the matrices of RGB values for each compatible image(size less than 224x224) of Synset x, 			      in each folder is also present a file_list.txt containing the list of files in that folder (useful when reading the data).
+"Synset(x) RGB data": contains all the .txt files containing the matrices of RGB values for each compatible image(size less than 224x224) of Synset x, in each folder is also present a file_list.txt containing the list of files in that folder (useful when reading the data).
 
-"Synset(x) BNDB data": contains all the .xml files containing the size of bounding boxes and other informations about the images of Synset x, if you 			       need to parse the xml you can modify the Python script "img_cropper.py" that already contains an xml parser. This data is 			       downloaded directly from imagenet.
+"Synset(x) BNDB data": contains all the .xml files containing the size of bounding boxes and other informations about the images of Synset x, if you need to parse the xml you can modify the Python script "img_cropper.py" that already contains an xml parser. This data is downloaded directly from imagenet.
 
 "birds_bnd_list.txt", "cars_bndb_list.txt": contains respectively the list of images with bndbs available for Synsets birds and cars.
 
@@ -20,18 +20,18 @@ Imagenet Classification with Deep Convolutional Neural Networks
 
 "Python scripts": contains the script to crop, create lists and read pixel values from images, the usage is: 
 		  python preprocess.py <images .tar file> <xml_bndb .tar.gz file> <output folder>
-		  the scripts automatically extract(both .tar and .tar.gz format are supported), crops and read the RGB values of any synset, download 			  the images archive and xml bounding boxes archive and launch the script. In the output folder the following elements will be created:
+		  the scripts automatically extract(both .tar and .tar.gz format are supported), crops and read the RGB values of any synset, download the images archive and xml bounding boxes archive and launch the script. In the output folder the following elements will be created:
 	          "file_list.txt": containing the list of images processed; 
 		  "img_out": containing all the images of the synset(native size);
 		  "xml_out": containing all the xml files with the infos of bndb boxes; 
 		  "cropped_images": containing the images subjects cropped around their bndb box;
 		  "RGB": contains all RGB data of all images of the synset (one .txt file per image).	
 
-"input_reader.cpp": reads the .txt files with the matrices of RGB values and save them in variables ready to be feed to the network or to the trainer, 			    you can read all the files contained in a file_list.txt or a single file at a time by providing the path to the file (you may need 			    to modify the path to have the reader work properly on your machine).
+"input_reader.cpp": reads the .txt files with the matrices of RGB values and save them in variables ready to be feed to the network or to the trainer, you can read all the files contained in a file_list.txt or a single file at a time by providing the path to the file (you may need to modify the path to have the reader work properly on your machine).
 
-"trainer.cpp": contains the training algorithm working for a single feature (you can change the values of learning rate, decay and batch size by 		       changing the corresponding parameters).
+"trainer.cpp": contains the training algorithm working for a single feature (you can change the values of learning rate, decay and batch size by changing the corresponding parameters).
 
-"architecture.cpp": contains the main architecture of the network and compute the actual ouput with random weights, the output is a probability 		    distributed on two categories (you can change the number of categories by simply changing a parameter).
+"architecture.cpp": contains the main architecture of the network and compute the actual ouput with random weights, the output is a probability distributed on two categories (you can change the number of categories by simply changing a parameter).
 
 check the documentation and comments contained in any file for additional details.
 
